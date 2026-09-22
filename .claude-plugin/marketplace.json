@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "ihateposting",
+  "owner": {
+    "name": "iHatePosting",
+    "url": "https://ihateposting.com"
+  },
+  "description": "The iHatePosting plugin for Claude Code.",
+  "plugins": [
+    {
+      "name": "ihateposting",
+      "source": "./",
+      "description": "Draft, check, schedule and publish posts to 14 social networks from Claude Code, through the hosted iHatePosting MCP server.",
+      "category": "productivity",
+      "homepage": "https://ihateposting.com/guides/post-to-social-media-from-an-ai-agent"
+    }
+  ]
+}

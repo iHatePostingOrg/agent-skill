@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "ihateposting",
+  "displayName": "iHatePosting",
+  "version": "0.1.0",
+  "description": "Draft, check, schedule and publish posts to 14 social networks from Claude Code, through the hosted iHatePosting MCP server.",
+  "author": {
+    "name": "iHatePosting",
+    "url": "https://ihateposting.com"
+  },
+  "homepage": "https://ihateposting.com/guides/post-to-social-media-from-an-ai-agent",
+  "repository": "https://github.com/iHatePostingOrg/agent-skill",
+  "license": "MIT",
+  "keywords": ["social-media", "scheduler", "mcp", "bluesky", "x", "linkedin", "instagram", "tiktok", "youtube", "threads", "pinterest", "mastodon"],
+  "userConfig": {
+    "api_key": {
+      "type": "string",
+      "title": "iHatePosting API key",
+      "description": "Starts with pk_live_. Create one at ihateposting.com under Settings > Developers.",
+      "sensitive": true,
+      "required": true
+    }
+  },
+  "mcpServers": "./mcp.claude.json"
+}

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "ihateposting": {
+      "type": "http",
+      "url": "https://ihateposting.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${IHATEPOSTING_API_KEY}"
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "ihateposting",
+  "version": "0.1.0",
+  "description": "Schedule and publish to 14 social networks from Gemini CLI: check a draft against each network's limits, then post now, schedule it, or keep it as a draft.",
+  "settings": [
+    {
+      "name": "iHatePosting API key",
+      "description": "Create one at ihateposting.com under Settings > Developers. It starts with pk_live_ and can post on your behalf.",
+      "envVar": "IHATEPOSTING_API_KEY",
+      "sensitive": true
+    }
+  ],
+  "mcpServers": {
+    "ihateposting": {
+      "description": "Hosted iHatePosting MCP server (Streamable HTTP, API-key auth).",
+      "url": "https://ihateposting.com/mcp",
+      "type": "http",
+      "headers": {
+        "Authorization": "Bearer ${IHATEPOSTING_API_KEY}"
+      }
+    }
+  }
+}

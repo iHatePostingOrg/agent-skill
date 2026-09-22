@@ -1,0 +1,14 @@
+{
+  "name": "ihateposting",
+  "version": "0.1.0",
+  "description": "Schedule and publish to 14 social networks from Grok Build through the hosted iHatePosting MCP server. Set IHATEPOSTING_API_KEY to your iHatePosting API key first.",
+  "author": {
+    "name": "iHatePosting",
+    "url": "https://ihateposting.com"
+  },
+  "homepage": "https://ihateposting.com",
+  "repository": "https://github.com/iHatePostingOrg/agent-skill",
+  "license": "MIT",
+  "keywords": ["ihateposting", "social-media", "scheduler", "mcp"],
+  "mcpServers": "./mcp.grok.json"
+}
