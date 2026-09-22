@@ -1,7 +1,7 @@
 {
   "name": "ihateposting",
   "displayName": "iHatePosting",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Draft, check and schedule posts to 14 social networks from Cursor. Every post is a draft until you say otherwise.",
   "author": {
     "name": "iHatePosting"
@@ -10,7 +10,28 @@
   "repository": "https://github.com/iHatePostingOrg/agent-skill",
   "license": "MIT",
   "logo": "assets/logo.png",
-  "keywords": ["social-media", "scheduler", "posting", "mcp", "bluesky", "linkedin", "instagram", "tiktok", "youtube", "threads", "mastodon", "pinterest"],
+  "keywords": [
+    "ihateposting",
+    "social-media",
+    "scheduler",
+    "social-media-scheduler",
+    "mcp",
+    "mcp-server",
+    "bluesky",
+    "x",
+    "linkedin",
+    "facebook",
+    "threads",
+    "mastodon",
+    "telegram",
+    "discord",
+    "tumblr",
+    "slack",
+    "instagram",
+    "pinterest",
+    "tiktok",
+    "youtube"
+  ],
   "variables": {
     "type": "object",
     "properties": {
@@ -20,7 +41,9 @@
         "description": "Starts with pk_live_. Create one at ihateposting.com under Settings, Developers."
       }
     },
-    "required": ["IHATEPOSTING_API_KEY"]
+    "required": [
+      "IHATEPOSTING_API_KEY"
+    ]
   },
   "mcpServers": "./mcp.cursor.json"
 }

@@ -1,0 +1,16 @@
+{
+  "text": "Before and after: one weekend, one small balcony. Swipe for the steps.",
+  "platforms": [
+    "instagram",
+    "threads",
+    "bluesky"
+  ],
+  "action": "draft",
+  "mediaIds": [
+    "IMAGE_ID_1_FROM_list_media",
+    "IMAGE_ID_2_FROM_list_media",
+    "IMAGE_ID_3_FROM_list_media",
+    "IMAGE_ID_4_FROM_list_media",
+    "IMAGE_ID_5_FROM_list_media"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "text": "How we made our test suite run faster without deleting a single test.\n\nChapters, links and credits go here, in the description.",
+  "platforms": [
+    "youtube"
+  ],
+  "action": "draft",
+  "mediaIds": [
+    "VIDEO_ID_FROM_list_media"
+  ],
+  "options": {
+    "youtube": {
+      "ytTitle": "How we made our test suite faster",
+      "ytMadeForKids": false,
+      "ytPrivacy": "private",
+      "ytTags": [
+        "testing",
+        "continuous integration",
+        "developer tools"
+      ],
+      "ytCategory": "science-tech"
+    }
+  }
+}

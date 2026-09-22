@@ -1,0 +1,27 @@
+{
+  "text": "We rebuilt the search page this month. Here is what changed and why. (1/4)",
+  "platforms": [
+    "x",
+    "bluesky"
+  ],
+  "action": "draft",
+  "options": {
+    "x": {
+      "threadSegments": [
+        "We rebuilt the search page this month. Here is what changed and why. (1/4)",
+        "Results now appear as you type. The old page waited for Enter, and plenty of people never pressed it. (2/4)",
+        "Filters stay set when you go back. Before, one tap on Back cleared everything you had picked. (3/4)",
+        "Next up: saved searches. Reply with the search you run most often and we will test with it. (4/4)"
+      ]
+    },
+    "bluesky": {
+      "threadSegments": [
+        "We rebuilt the search page this month. Here is what changed and why. (1/4)",
+        "Results now appear as you type. The old page waited for Enter, and plenty of people never pressed it. (2/4)",
+        "Filters stay set when you go back. Before, one tap on Back cleared everything you had picked. (3/4)",
+        "Next up: saved searches. Reply with the search you run most often and we will test with it. (4/4)"
+      ],
+      "lang": "en"
+    }
+  }
+}

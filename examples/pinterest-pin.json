@@ -1,0 +1,17 @@
+{
+  "text": "A one-page checklist for repotting houseplants: pick the pot, loosen the roots, water last.",
+  "platforms": [
+    "pinterest"
+  ],
+  "action": "draft",
+  "mediaIds": [
+    "IMAGE_ID_FROM_list_media"
+  ],
+  "options": {
+    "pinterest": {
+      "boardId": "BOARD_ID_FROM_list_pinterest_boards",
+      "title": "Repotting checklist for houseplants",
+      "link": "https://example.com/repotting-checklist"
+    }
+  }
+}

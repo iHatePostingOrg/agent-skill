@@ -1,0 +1,21 @@
+{
+  "text": "Our spring workshop dates are set. We are running four half-day sessions on writing clear documentation: planning a page, writing the first draft, editing for plain language, and keeping docs current after launch. Each session is small, so everyone gets feedback on their own work. Details and sign-up: https://example.com/workshops",
+  "platforms": [
+    "linkedin",
+    "facebook",
+    "x",
+    "bluesky",
+    "threads"
+  ],
+  "action": "draft",
+  "overrides": {
+    "x": "Spring workshop dates are set: four half-day sessions on writing clear documentation, with feedback on your own work. Sign-up link on our profile.",
+    "bluesky": "Spring workshop dates are set: four half-day sessions on writing clear documentation, with feedback on your own work. https://example.com/workshops",
+    "threads": "Our spring workshop dates are set. Four half-day sessions on writing clear documentation, from planning a page to keeping it current. Small groups, so you get feedback on your own work. https://example.com/workshops"
+  },
+  "options": {
+    "bluesky": {
+      "lang": "en"
+    }
+  }
+}

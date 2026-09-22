@@ -9,6 +9,13 @@ const MCP_URL = "https://ihateposting.com/mcp";
 const problems = [];
 const fail = (msg) => problems.push(msg);
 
+const walk = (dir) =>
+  readdirSync(dir).flatMap((n) => {
+    const p = join(dir, n);
+    if (n === ".git" || n === "node_modules") return [];
+    return statSync(p).isDirectory() ? walk(p) : [p];
+  });
+
 const readJson = (rel) => {
   try {
     return JSON.parse(readFileSync(join(ROOT, rel), "utf8"));
@@ -98,13 +105,35 @@ if (field("name") !== "ihateposting") fail(`${SKILL}: name must be ihateposting,
 if (!field("description") || field("description").length > 1024) fail(`${SKILL}: description must be 1 to 1024 characters`);
 if (field("compatibility").length > 500) fail(`${SKILL}: compatibility must be at most 500 characters`);
 
-// 5. No real key anywhere.
-const walk = (dir) =>
-  readdirSync(dir).flatMap((n) => {
-    const p = join(dir, n);
-    if (n === ".git" || n === "node_modules") return [];
-    return statSync(p).isDirectory() ? walk(p) : [p];
-  });
+// 5. The docs name exactly the product's tools and networks. Update these two
+// lists whenever the MCP server changes (packages/mcp/src/tools.ts upstream).
+const TOOLS = [
+  "whoami", "list_accounts", "get_platform_rules", "validate_post", "create_post", "list_posts", "get_post",
+  "update_post", "reschedule_post", "retry_post", "delete_post", "list_media", "upload_media",
+  "list_pinterest_boards", "get_analytics",
+];
+const NETWORKS = ["Bluesky", "X", "LinkedIn", "Facebook", "Threads", "Mastodon", "Telegram", "Discord", "Tumblr", "Slack", "Instagram", "Pinterest", "TikTok", "YouTube"];
+const readme = existsSync(join(ROOT, "README.md")) ? readFileSync(join(ROOT, "README.md"), "utf8") : "";
+for (const t of TOOLS) if (!readme.includes(`\`${t}\``)) fail(`README.md: does not list the \`${t}\` tool`);
+for (const n of NETWORKS) if (!new RegExp(`\\b${n}\\b`).test(readme)) fail(`README.md: does not mention ${n}`);
+// A backticked tool-shaped name in the skill must be a real tool.
+const toolShaped = /`((?:get|list|create|update|delete|retry|reschedule|upload|validate|publish|schedule|cancel|unschedule|remove|send)_[a-z_]+|whoami)`/g;
+for (const f of walk(join(ROOT, "skills")).filter((p) => p.endsWith(".md"))) {
+  const text = readFileSync(f, "utf8");
+  for (const m of text.matchAll(toolShaped)) if (!TOOLS.includes(m[1])) fail(`${relative(ROOT, f)}: names \`${m[1]}\`, which is not an iHatePosting tool`);
+  // Same leak as SKILL.md: Gemini CLI fills \${...} in every skill file it loads.
+  if (text.includes("${IHATEPOSTING_API_KEY}")) fail(`${relative(ROOT, f)}: contains \${IHATEPOSTING_API_KEY}; write the bare name instead`);
+}
+// Examples: valid JSON, and never publish by default.
+if (existsSync(join(ROOT, "examples"))) {
+  for (const f of walk(join(ROOT, "examples")).filter((p) => p.endsWith(".json"))) {
+    let j;
+    try { j = JSON.parse(readFileSync(f, "utf8")); } catch (e) { fail(`${relative(ROOT, f)}: not valid JSON (${e.message})`); continue; }
+    if (j.action !== "draft") fail(`${relative(ROOT, f)}: action must be "draft", found ${JSON.stringify(j.action)}`);
+  }
+}
+
+// 6. No real key anywhere.
 for (const p of walk(ROOT)) {
   if (p.endsWith(".png")) continue;
   if (/pk_live_[0-9a-zA-Z]{6,}/.test(readFileSync(p, "utf8"))) fail(`${relative(ROOT, p)}: contains what looks like a real API key`);

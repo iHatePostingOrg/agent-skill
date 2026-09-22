@@ -1,6 +1,6 @@
 {
   "name": "ihateposting",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Schedule and publish to 14 social networks from Gemini CLI: check a draft against each network's limits, then post now, schedule it, or keep it as a draft.",
   "settings": [
     {

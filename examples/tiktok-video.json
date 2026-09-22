@@ -1,0 +1,19 @@
+{
+  "text": "Clearing a Monday inbox before the coffee cools.",
+  "platforms": [
+    "tiktok"
+  ],
+  "action": "draft",
+  "mediaIds": [
+    "VIDEO_ID_FROM_list_media"
+  ],
+  "options": {
+    "tiktok": {
+      "tiktokPrivacy": "private",
+      "tiktokAllowComment": true,
+      "tiktokAllowDuet": false,
+      "tiktokAllowStitch": false,
+      "tiktokAiGenerated": false
+    }
+  }
+}

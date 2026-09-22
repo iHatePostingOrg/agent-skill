@@ -1,0 +1,18 @@
+{
+  "text": "Community call this Thursday at 17:00 UTC. We will walk through the new export feature and answer questions for the rest of the hour. Agenda and join link: https://example.com/community-call",
+  "platforms": [
+    "telegram",
+    "discord",
+    "slack",
+    "mastodon"
+  ],
+  "action": "draft",
+  "options": {
+    "discord": {
+      "linkCard": false
+    },
+    "mastodon": {
+      "mastodonVisibility": "unlisted"
+    }
+  }
+}
