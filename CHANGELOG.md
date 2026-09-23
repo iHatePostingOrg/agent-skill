@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.1
+
+- The skill no longer tells a Gemini CLI user to fetch an API key. Gemini CLI
+  discovers `skills/` at the extension root on its own — the official example
+  declares nothing but a name and a version — so SKILL.md reaches the model
+  there, and since 0.3.0 removed the key it was giving instructions that
+  cannot be followed: `gemini extensions config ihateposting` now configures
+  nothing, because there is no setting left to configure.
+- "Check the key first" is now "Check the sign-in first", and it sends a
+  Gemini CLI user to `/mcp auth ihateposting` instead. It also says outright
+  never to ask that user for a key: there is nowhere to put one, and a key in
+  a header would be blanked before it left the machine.
+- `compatibility` now says an account is what is required, and that most
+  agents send a key while Gemini CLI signs in.
+
 ## 0.3.0
 
 - Gemini CLI now signs in with OAuth instead of taking an API key, and the

@@ -2,9 +2,9 @@
 name: ihateposting
 description: Draft, check, schedule and publish social posts to Bluesky, X, LinkedIn, Facebook, Instagram, Threads, Pinterest, TikTok, YouTube, Mastodon, Telegram, Discord, Tumblr and Slack through the iHatePosting MCP tools. Use when the user asks to post, cross-post, schedule, draft, reschedule or retry a post, or to see what is going out and how it did.
 license: MIT
-compatibility: Needs an iHatePosting API key (pk_live_...) and network access to ihateposting.com. Uses the iHatePosting MCP server this plugin adds; the ihateposting CLI (npm i -g ihateposting) is a fallback for text-only posts.
+compatibility: Needs an iHatePosting account and network access to ihateposting.com. Most agents send an API key (pk_live_...); Gemini CLI signs in through the browser instead and needs no key. Uses the iHatePosting MCP server this plugin adds; the ihateposting CLI (npm i -g ihateposting) is a fallback for text-only posts.
 metadata:
-  last-updated: "2026-09-22"
+  last-updated: "2026-09-23"
   homepage: "https://ihateposting.com/guides/post-to-social-media-from-an-ai-agent"
 allowed-tools: mcp__plugin_ihateposting_ihateposting__whoami mcp__plugin_ihateposting_ihateposting__list_accounts mcp__plugin_ihateposting_ihateposting__get_platform_rules mcp__plugin_ihateposting_ihateposting__validate_post mcp__plugin_ihateposting_ihateposting__list_posts mcp__plugin_ihateposting_ihateposting__get_post mcp__plugin_ihateposting_ihateposting__list_media mcp__plugin_ihateposting_ihateposting__list_pinterest_boards Bash(ihateposting whoami *) Bash(ihateposting accounts *) Bash(ihateposting platforms *) Bash(ihateposting posts *)
 ---
@@ -37,14 +37,18 @@ the user's own settings already allow it. Cursor, Gemini CLI and Grok Build
 use their own approval settings and may not ask. In every agent, get the
 user's go-ahead in words before a tool call that publishes.
 
-## Check the key first
+## Check the sign-in first
 
-If none of the iHatePosting tools are available, the API key was probably
-never entered. In Claude Code, that happens after an install from the VS Code
-extension, the desktop app or a plain shell: tell the user to run
-`/plugin configure ihateposting@ihateposting` in terminal Claude Code. In
-Gemini CLI it is `gemini extensions config ihateposting`; in Grok Build and
-Cursor the key comes from the `IHATEPOSTING_API_KEY` setting.
+If none of the iHatePosting tools are available, the account was probably
+never connected. In Claude Code, that happens after an install from the VS
+Code extension, the desktop app or a plain shell: tell the user to run
+`/plugin configure ihateposting@ihateposting` in terminal Claude Code. In Grok
+Build and Cursor the key comes from the `IHATEPOSTING_API_KEY` setting.
+
+Gemini CLI uses no key at all — it signs in through the browser. If its tools
+are missing or answer 401, tell the user to run `/mcp auth ihateposting`.
+Never tell a Gemini CLI user to create or paste an API key: there is nowhere
+to put one, and a key in a header would not reach the server anyway.
 
 Otherwise call `whoami`. What it returns is the user's iHatePosting login,
 not a social media handle. The handles from `list_accounts` belong to the
