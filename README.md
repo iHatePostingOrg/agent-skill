@@ -118,13 +118,14 @@ Reels, carousels, YouTube, Pinterest, TikTok and more. Every one is a draft.
 
 ## Install
 
-Get an API key first ([below](#get-an-api-key)), then pick your agent.
+Get an API key first ([below](#get-an-api-key)), then pick your agent — except
+on Gemini CLI, which signs you in in the browser and needs no key.
 
 | Agent | How it installs | Where the key goes |
 |-------|-----------------|--------------------|
 | Claude Code | `/plugin install` from this repository's marketplace | Asked for at install, stored as a secret |
 | Cursor | Cursor Marketplace once listed, or `~/.cursor/mcp.json` | `IHATEPOSTING_API_KEY` |
-| Gemini CLI | `gemini extensions install` | Asked for at install, kept in your system keychain |
+| Gemini CLI | `gemini extensions install` | No key — you sign in in the browser |
 | Grok Build | `grok plugin install ... --trust` | `IHATEPOSTING_API_KEY` in your environment |
 | ChatGPT, Claude on the web and others | Their own MCP settings | See the [setup guide](https://ihateposting.com/guides/post-to-social-media-from-an-ai-agent) |
 
@@ -194,8 +195,18 @@ cursor://anysphere.cursor-deeplink/mcp/install?name=ihateposting&config=eyJ0eXBl
 gemini extensions install https://github.com/iHatePostingOrg/agent-skill
 ```
 
-Gemini CLI asks for your API key during the install and keeps it in your
-system keychain. Change it later with `gemini extensions config ihateposting`.
+No API key. The first time a tool runs, Gemini CLI opens your browser, you
+sign in to iHatePosting and approve, and it keeps the token in
+`~/.gemini/mcp-oauth-tokens.json`, refreshing it as needed. Sign in again
+later with `/mcp auth ihateposting`.
+
+This is the one agent here that does not take a key, and that is deliberate.
+Gemini CLI expands `${...}` in MCP headers against a sanitized environment and
+blanks any variable whose name contains KEY, TOKEN, SECRET or AUTH, so an
+`Authorization: Bearer ${IHATEPOSTING_API_KEY}` header leaves as a bare
+`Bearer ` and the call fails — silently, with nothing in Google's docs to warn
+you. Signing in avoids the problem rather than working around it.
+
 The extension uses `url` with `type: "http"`, the form Gemini CLI 0.21 and
 later reads as Streamable HTTP.
 
@@ -420,8 +431,8 @@ Plans and prices: [ihateposting.com/pricing](https://ihateposting.com/pricing).
 
 - **The tools are missing, or say "No API key".** The client sent no key. In
   Claude Code, run `/plugin configure ihateposting@ihateposting` in terminal
-  Claude Code. In Gemini CLI, run `gemini extensions config ihateposting`. In
-  Cursor and Grok Build, set `IHATEPOSTING_API_KEY`.
+  Claude Code. In Cursor and Grok Build, set `IHATEPOSTING_API_KEY`. Gemini
+  CLI uses no key — run `/mcp auth ihateposting` to sign in again.
 - **"iHatePosting API 401".** The key is wrong, has been replaced by a newer
   one, or the client sent an unfilled placeholder instead of the key. Check
   the client's setting before assuming the key was revoked.
@@ -457,12 +468,16 @@ Plans and prices: [ihateposting.com/pricing](https://ihateposting.com/pricing).
 
 ## Network endpoints and credentials
 
-- This package calls exactly one endpoint: `https://ihateposting.com/mcp`, MCP over
-  Streamable HTTP.
-- It needs one credential: an iHatePosting API key, sent as
-  `Authorization: Bearer <key>`. Claude Code and Gemini CLI store it as a
-  secret; Cursor keeps it as a plugin setting; Grok Build reads it from the
-  `IHATEPOSTING_API_KEY` environment variable.
+- This package calls one server, by one of two paths: `https://ihateposting.com/mcp`
+  for the agents that send an API key, and `https://ihateposting.com/mcp/oauth`
+  for Gemini CLI, which signs in instead. Both are MCP over Streamable HTTP.
+- The key path sends `Authorization: Bearer <key>`. Claude Code stores the key
+  as a secret; Cursor keeps it as a plugin setting; Grok Build reads it from
+  the `IHATEPOSTING_API_KEY` environment variable.
+- The OAuth path sends no key at all. Gemini CLI discovers the sign-in from
+  the server's own metadata, uses PKCE, registers itself, and keeps the token
+  in `~/.gemini/mcp-oauth-tokens.json`. The token can be revoked at
+  ihateposting.com under Settings → Developers.
 - There are no hooks and no install scripts, and nothing runs on your machine.
 
 ## What is in this repository

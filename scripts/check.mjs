@@ -6,6 +6,10 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const MCP_URL = "https://ihateposting.com/mcp";
+/* The same server, reached the other way: this endpoint answers 401 with a
+   WWW-Authenticate pointing at our protected-resource metadata, which is how
+   an OAuth client finds the sign-in. Used by Gemini CLI — see below. */
+const OAUTH_MCP_URL = "https://ihateposting.com/mcp/oauth";
 const problems = [];
 const fail = (msg) => problems.push(msg);
 
@@ -74,13 +78,34 @@ const market = readJson(".claude-plugin/marketplace.json");
 if (market && !market.plugins?.some((p) => p.name === "ihateposting" && p.source === "./")) {
   fail(".claude-plugin/marketplace.json: needs the ihateposting plugin with source ./");
 }
+/* Gemini CLI is the one agent here that must NOT be handed the API key.
+   Its MCP header values are expanded against a SANITIZED environment
+   (gemini-cli packages/core/src/tools/mcp-client.ts, createTransportRequestInit),
+   and packages/core/src/services/environmentSanitization.ts redacts any
+   variable whose NAME matches /KEY/i — which IHATEPOSTING_API_KEY does. A
+   redacted variable expands to "", so `Bearer ${IHATEPOSTING_API_KEY}` went
+   out as a bare "Bearer " and every call 401'd. Nothing in Google's own docs
+   mentions this; their worked example hardcodes the token.
+
+   So this extension signs in with OAuth, which Gemini CLI discovers from the
+   RFC 9728 metadata we already serve. `oauth.enabled` is not decoration:
+   mcp-client.ts only starts the flow by itself when it is true ("Only trigger
+   automatic OAuth if explicitly enabled in config"); without it the user is
+   left to run `/mcp auth ihateposting` by hand. */
 const gemini = readJson("gemini-extension.json");
 if (gemini) {
   if (gemini.name !== "ihateposting") fail("gemini-extension.json: name must be ihateposting");
-  checkServer("gemini-extension.json", gemini.mcpServers?.ihateposting, "Bearer ${IHATEPOSTING_API_KEY}");
-  const setting = gemini.settings?.find((s) => s.envVar === "IHATEPOSTING_API_KEY");
-  if (!setting?.sensitive) fail("gemini-extension.json: the IHATEPOSTING_API_KEY setting must be sensitive");
-  if (gemini.mcpServers?.ihateposting?.httpUrl) fail("gemini-extension.json: httpUrl is deprecated; use url with type http");
+  const g = gemini.mcpServers?.ihateposting;
+  if (!g) {
+    fail('gemini-extension.json: no "ihateposting" server');
+  } else {
+    if (g.url !== OAUTH_MCP_URL) fail(`gemini-extension.json: url is ${JSON.stringify(g.url)}, expected ${OAUTH_MCP_URL}`);
+    if (g.type !== "http") fail(`gemini-extension.json: type is ${JSON.stringify(g.type)}, expected "http"`);
+    if (g.oauth?.enabled !== true) fail("gemini-extension.json: oauth.enabled must be true, or Gemini CLI never starts the sign-in itself");
+    if (g.headers) fail("gemini-extension.json: no headers — a ${...} naming a KEY/TOKEN/SECRET/AUTH is blanked by Gemini CLI's environment redaction and ships as an empty credential");
+    if (g.httpUrl) fail("gemini-extension.json: httpUrl is deprecated; use url with type http");
+  }
+  if (gemini.settings) fail("gemini-extension.json: no settings — signing in with OAuth means there is no key for anyone to paste");
   versions.add(gemini.version);
 }
 if (versions.size !== 1) fail(`manifests disagree on the version: ${[...versions].join(", ")}`);
