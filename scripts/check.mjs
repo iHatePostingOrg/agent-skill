@@ -31,19 +31,25 @@ const readJson = (rel) => {
 
 // 1. One MCP file per agent, each filling in the key its own way.
 const EXPECTED = {
-  "mcp.claude.json": "Bearer ${user_config.api_key}",
-  "mcp.cursor.json": "Bearer ${IHATEPOSTING_API_KEY}",
-  "mcp.grok.json": "Bearer ${IHATEPOSTING_API_KEY}",
+  /* Each file also declares WHICH client it is, as ?client=<id> on the URL.
+     An API key names a person, never an app, so without this every connector
+     reaches iHatePosting anonymously and its admin can only show a key prefix.
+     The id is checked exactly, not just "has a query string": a copy-pasted
+     file that still claims to be Cursor is the whole failure this guards. */
+  "mcp.claude.json": { auth: "Bearer ${user_config.api_key}", client: "claude-code" },
+  "mcp.cursor.json": { auth: "Bearer ${IHATEPOSTING_API_KEY}", client: "cursor" },
+  "mcp.grok.json": { auth: "Bearer ${IHATEPOSTING_API_KEY}", client: "grok" },
 };
-const checkServer = (where, s, auth) => {
+const checkServer = (where, s, auth, client) => {
   if (!s) return fail(`${where}: no "ihateposting" server`);
-  if (s.url !== MCP_URL) fail(`${where}: url is ${JSON.stringify(s.url)}, expected ${MCP_URL}`);
+  const want = `${MCP_URL}?client=${client}`;
+  if (s.url !== want) fail(`${where}: url is ${JSON.stringify(s.url)}, expected ${want}`);
   if (s.type !== "http") fail(`${where}: type is ${JSON.stringify(s.type)}, expected "http"`);
   if (s.headers?.Authorization !== auth) fail(`${where}: Authorization is ${JSON.stringify(s.headers?.Authorization)}, expected ${JSON.stringify(auth)}`);
 };
-for (const [file, auth] of Object.entries(EXPECTED)) {
+for (const [file, { auth, client }] of Object.entries(EXPECTED)) {
   const j = readJson(file);
-  if (j) checkServer(file, j.mcpServers?.ihateposting, auth);
+  if (j) checkServer(file, j.mcpServers?.ihateposting, auth, client);
 }
 
 // 2. Each manifest points at its own MCP file, and the names agree.
@@ -108,6 +114,28 @@ if (gemini) {
   if (gemini.settings) fail("gemini-extension.json: no settings — signing in with OAuth means there is no key for anyone to paste");
   versions.add(gemini.version);
 }
+/* THE ONE-CLICK INSTALL LINK, which is a config too — just base64'd inside a
+   URL, so nothing above sees it and no human diff reads it.
+   It was missed exactly that way on 2026-09-25: every visible JSON block got
+   ?client=cursor and the deeplink beside them kept installing an untagged
+   server, which would have quietly attributed every Cursor install to nobody.
+   Decoding it here means the gate reads what the button actually installs. */
+for (const file of walk(ROOT).filter((p) => p.endsWith(".md"))) {
+  const text = readFileSync(file, "utf8");
+  for (const [, b64] of text.matchAll(/cursor-deeplink\/mcp\/install\?[^\s)]*?config=([A-Za-z0-9+/=]+)/g)) {
+    let cfg;
+    try {
+      cfg = JSON.parse(Buffer.from(b64, "base64").toString("utf8"));
+    } catch {
+      fail(`${relative(ROOT, file)}: a cursor deeplink's config= is not valid base64 JSON`);
+      continue;
+    }
+    const want = `${MCP_URL}?client=cursor`;
+    if (cfg.url !== want) fail(`${relative(ROOT, file)}: cursor deeplink installs url ${JSON.stringify(cfg.url)}, expected ${want}`);
+    if (/pk_live_/.test(b64) || /pk_live_/.test(JSON.stringify(cfg))) fail(`${relative(ROOT, file)}: a cursor deeplink carries a real API key`);
+  }
+}
+
 if (versions.size !== 1) fail(`manifests disagree on the version: ${[...versions].join(", ")}`);
 
 // 3. No shared file that some directory would install with a raw placeholder.

@@ -1,6 +1,6 @@
 {
   "name": "ihateposting",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Schedule and publish to 14 social networks from Grok Build through the hosted iHatePosting MCP server. Set IHATEPOSTING_API_KEY to your iHatePosting API key first.",
   "author": {
     "name": "iHatePosting",

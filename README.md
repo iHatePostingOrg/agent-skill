@@ -183,7 +183,7 @@ The same configuration as a one-click link (it holds the `${env:…}` reference,
 never a key):
 
 ```
-cursor://anysphere.cursor-deeplink/mcp/install?name=ihateposting&config=eyJ0eXBlIjoiaHR0cCIsInVybCI6Imh0dHBzOi8vaWhhdGVwb3N0aW5nLmNvbS9tY3AiLCJoZWFkZXJzIjp7IkF1dGhvcml6YXRpb24iOiJCZWFyZXIgJHtlbnY6SUhBVEVQT1NUSU5HX0FQSV9LRVl9In19
+cursor://anysphere.cursor-deeplink/mcp/install?name=ihateposting&config=eyJ0eXBlIjoiaHR0cCIsInVybCI6Imh0dHBzOi8vaWhhdGVwb3N0aW5nLmNvbS9tY3A/Y2xpZW50PWN1cnNvciIsImhlYWRlcnMiOnsiQXV0aG9yaXphdGlvbiI6IkJlYXJlciAke2VudjpJSEFURVBPU1RJTkdfQVBJX0tFWX0ifX0=
 ```
 
 </details>

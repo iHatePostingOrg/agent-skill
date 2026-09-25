@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.3
+
+- The Cursor **one-click install link** now installs the tagged URL too. 0.3.2
+  updated every visible JSON block and missed this one, because its config is
+  base64 inside a `cursor://` URL — invisible to a reader and to the release
+  gate. Anyone who used the button instead of copying the block was still
+  installing an untagged server.
+- `scripts/check.mjs` now decodes those deeplinks and checks what the button
+  actually installs, so the two can never drift apart again. It also asserts
+  each config declares the RIGHT client id rather than merely having one — a
+  file copy-pasted from another client is the failure that matters.
+- This is the fix for 0.3.2 landing with a red CI check: the gate hardcoded the
+  untagged URL and exact-matched it, so the release that added the tag failed
+  its own test.
+
 ## 0.3.2
 
 - The three key-based configs now say which tool they are, as `?client=` on

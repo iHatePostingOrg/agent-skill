@@ -1,7 +1,7 @@
 {
   "name": "ihateposting",
   "displayName": "iHatePosting",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Draft, check and schedule posts to 14 social networks from Cursor. Every post is a draft until you say otherwise.",
   "author": {
     "name": "iHatePosting"
