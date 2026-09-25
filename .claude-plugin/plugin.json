@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "ihateposting",
   "displayName": "iHatePosting",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Draft, check, schedule and publish posts to 14 social networks from Claude Code, through the hosted iHatePosting MCP server.",
   "author": {
     "name": "iHatePosting",

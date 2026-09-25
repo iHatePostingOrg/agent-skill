@@ -2,7 +2,7 @@
   "mcpServers": {
     "ihateposting": {
       "type": "http",
-      "url": "https://ihateposting.com/mcp",
+      "url": "https://ihateposting.com/mcp?client=grok",
       "headers": {
         "Authorization": "Bearer ${IHATEPOSTING_API_KEY}"
       }

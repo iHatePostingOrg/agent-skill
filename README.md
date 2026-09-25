@@ -172,7 +172,7 @@ To add the server by hand instead, put this in `~/.cursor/mcp.json`, set
   "mcpServers": {
     "ihateposting": {
       "type": "http",
-      "url": "https://ihateposting.com/mcp",
+      "url": "https://ihateposting.com/mcp?client=cursor",
       "headers": { "Authorization": "Bearer ${env:IHATEPOSTING_API_KEY}" }
     }
   }

@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.2
+
+- The three key-based configs now say which tool they are, as `?client=` on
+  the server URL: `claude-code`, `cursor` and `grok`. An API key identifies a
+  person and never an app, so until now every connector arrived anonymously
+  and iHatePosting's own admin could only show the key's prefix — Claude Code,
+  Cursor and a hand-written script were indistinguishable. The id is a public
+  name, not a credential; nothing is granted on the strength of it, and an
+  unrecognised value is simply ignored.
+- `gemini-extension.json` is deliberately unchanged. It signs in over
+  `/mcp/oauth`, so it is already named by its own registration and has nothing
+  to declare.
+
 ## 0.3.1
 
 - The skill no longer tells a Gemini CLI user to fetch an API key. Gemini CLI
