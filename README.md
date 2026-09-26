@@ -11,6 +11,17 @@ post safely.
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![npm: ihateposting-mcp](https://img.shields.io/npm/v/ihateposting-mcp?label=ihateposting-mcp)](https://www.npmjs.com/package/ihateposting-mcp)
 [![npm: ihateposting](https://img.shields.io/npm/v/ihateposting?label=ihateposting)](https://www.npmjs.com/package/ihateposting)
+<!-- ?variant=verified is deliberate, not an oversight. The default badge
+     renders the numeric grade, which is currently "C · Limited view" (74/100)
+     — and M8ven's own listing explains why: "New projects cap at C until
+     adoption is earned", on a repo that is days old with no stars yet, plus
+     "static analysis for JavaScript is partially covered". That number
+     measures this repository's age and adoption, not the server's quality, so
+     showing it would tell a reader something the assessment did not actually
+     say. The verified variant claims only what was genuinely established —
+     Verified Publisher, connected through their GitHub App, re-checked on
+     every push. Swap the variant out once the grade reflects the code. -->
+[![M8ven: continuously verified](https://m8ven.ai/badge/mcp/ihatepostingorg-agent-skill-1f032g?variant=verified)](https://m8ven.ai/mcp/ihatepostingorg-agent-skill-1f032g)
 
 **Nothing goes out unless you say so.** A new post is saved as a draft unless
 you ask for it to be published now or at a set time.
