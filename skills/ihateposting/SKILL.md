@@ -111,10 +111,17 @@ what it reports, then call `create_post`.
 
 - Attach library ids through `mediaIds`, in order. `list_media` shows what is
   already in the library.
-- `upload_media` has two ways in, and the order matters. PREFER `url`: we
-  fetch the file ourselves, at full length, and it is the only way that works
-  for a video of any real size. Use `base64` only for something you generated
-  yourself and could generate again.
+- `upload_media` has two ways in, and the order matters. PREFER `url` —
+  always, including for a picture you just generated: we fetch the file
+  ourselves at full length, and it is the only thing that works for a video or
+  for anything more than a few kilobytes. We take whatever the link serves, so
+  a host that will not name the type (`application/octet-stream`, as presigned
+  S3, Drive and Dropbox links do) is fine.
+- **An image you generated is not the exception — it is the usual casualty.**
+  It is the single most common thing to arrive truncated, and it almost always
+  has a URL of its own. Pass that URL. If an upload comes back saying the file
+  looks incomplete, that means your own output was cut short: retry with the
+  URL rather than handing the job to the person.
 - **Never send a file that exists only in this conversation as `base64`.**
   Those bytes are your own output, your output has a length limit, and the
   file arrives cut short — a corrupt image we will reject after you have spent
@@ -246,18 +253,28 @@ calling that tool again; do not retry in a loop.
 ## Command-line fallback
 
 If the MCP tools are unavailable and the `ihateposting` command is installed,
-the same work can be done for text posts. The CLI has no option for media.
+the same work can be done from a shell — including media, which it reads off
+disk. That makes it the answer when someone names a file on their own
+computer: nothing reachable over MCP can read their filesystem, but a command
+running on their machine can.
 
 ```bash
 ihateposting whoami
 ihateposting accounts                                      # add --json to read the output
 ihateposting platforms
-ihateposting post "text" --to bluesky,linkedin --check     # validates, creates nothing
+ihateposting upload "C:\clips\launch.mp4"                  # prints a media id
+ihateposting post "text" --to bluesky,linkedin --now --check   # see the note below
 ihateposting post "text" --to bluesky,linkedin             # draft
+ihateposting post "text" --to instagram --media "$ID"      # attach what you uploaded
 ihateposting post "text" --to x --at "2026-10-01 9:00 AM"  # scheduled
 ihateposting post "text" --to x --now                      # PUBLISHES: ask first
-ihateposting posts
+ihateposting posts --status scheduled                      # and read the total it prints
 ```
+
+**Give `--check` the flags you are about to post with.** It validates the
+command exactly as written, so a bare `--check` checks a *draft* — and a draft
+is never counted against a plan's limits. Pass `--now` or `--at` and any
+`--media`, or it will answer "looks good" to a question you did not ask.
 
 The CLI reads its key from `ihateposting login <key>`, or from the
 `IHATEPOSTING_API_KEY` environment variable.

@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.3.4
+
+- **`--check` was documented in the form that answers the wrong question.** The
+  CLI fallback showed `post "text" --to bluesky,linkedin --check`, and a bare
+  `--check` validates the command exactly as written — which, with no `--now`
+  or `--at`, is a *draft*. Drafts are never counted against a plan's limits, so
+  it answered "looks good" to a post that would later be refused. A customer's
+  agent hit precisely that: it validated, was told the batch was fine, created
+  53 posts and had 20 refused. The example now passes `--now`, and a note says
+  to give `--check` the flags you are about to post with.
+- **The skill repeated the guidance that caused the failure it warns about.**
+  "Use `base64` only for something you generated yourself" — and a generated
+  image IS the model's own output, so it is the single most likely thing to
+  arrive truncated. A customer's ChatGPT generated an image, sent it as
+  base64, and it was refused (presign 200, confirm 415, one second apart); it
+  then asked the person to upload the image by hand rather than passing the
+  URL the image already had. Now: prefer `url` always, generated pictures
+  included, and treat an "incomplete" refusal as a signal to retry with the
+  URL. Also notes that a link serving `application/octet-stream` is fine,
+  which is what presigned S3, Drive and Dropbox links return.
+- **"The CLI has no option for media" stopped being true.** It has
+  `ihateposting upload <path>`, which reads a file off disk and prints a media
+  id, and `--media` to attach it. That matters most for the case the skill is
+  otherwise silent on: nothing reachable over MCP can read someone's
+  filesystem, but a command running on their machine can. Both are now in the
+  example block.
+
 ## 0.3.3
 
 - The Cursor **one-click install link** now installs the tagged URL too. 0.3.2
