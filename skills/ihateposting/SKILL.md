@@ -185,9 +185,26 @@ what it reports, then call `create_post`.
 
 ## Afterwards
 
-`list_posts` shows the 50 most recent posts with each send's status and live
-URL; `get_post` shows one in detail. Report each platform's result, and the
-error text exactly as returned. It usually names the fix.
+`list_posts` shows posts with each send's status and live URL; `get_post`
+shows one in detail. Report each platform's result, and the error text exactly
+as returned. It usually names the fix.
+
+**Never report a count from the page you were handed.** `list_posts` returns
+one page — 50 by default, 200 at most — and the reply carries `total` (how
+many match your filter) beside `returned` (how many you got). If they differ
+you are holding a page, not the answer: page on with `cursor` while `hasMore`
+is true, or better, ask the question directly.
+
+- "How many are scheduled?" → `list_posts` with `status: "scheduled"`, then
+  read `total`. Do not count the rows.
+- "What goes out in December?" → `from: "2026-12-01"`, `to: "2026-12-31"`.
+  Both are inclusive whole days, and they match the SCHEDULED time.
+- A filter that matches nothing answers `total: 0` — that means none, which
+  is different from not having looked.
+
+This matters more than it sounds. A customer with 605 scheduled posts was once
+told they had 40, and that December was empty when it held 136, because the
+reply was a slice and nothing said so.
 
 - A post is `partial` when some sends published and others failed or were
   skipped. A send is `skipped` when it broke that network's rules at publish

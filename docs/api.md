@@ -86,7 +86,7 @@ Every route below takes `Authorization: Bearer pk_live_…`. The last column nam
 | GET | `/api/v1/platforms` | What each platform accepts, and which options it requires | `get_platform_rules` |
 | POST | `/api/v1/posts/validate` | Checks a post against each platform's rules without creating anything | `validate_post` |
 | POST | `/api/v1/posts` | Creates a post as a draft, scheduled for later, or sent now | `create_post` |
-| GET | `/api/v1/posts` | Your 50 most recently created posts, with each send's status | `list_posts` |
+| GET | `/api/v1/posts` | Your posts with each send's status. `?status=` and `?from=`/`?to=` (scheduled date, inclusive whole days), `?limit=` 1-200, `?cursor=` to page. Returns `total`, `returned`, `hasMore`, `nextCursor` | `list_posts` |
 | GET | `/api/v1/posts/{id}` | One post in full: text, options, media, sends | `get_post` |
 | PATCH | `/api/v1/posts/{id}` | Replaces a draft, scheduled or failed post | `update_post` |
 | DELETE | `/api/v1/posts/{id}` | Removes a post from iHatePosting | `delete_post` |

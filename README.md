@@ -65,7 +65,7 @@ to your posts and accounts.
 | `get_platform_rules` | Each network's character limit, media rules, video formats and length, and required options | Reads |
 | `validate_post` | Checks a post against every network you name, without creating anything | Reads |
 | `create_post` | Creates a post: a draft by default, or `now` or `schedule` when asked | Creates; publishes with `now` or `schedule` |
-| `list_posts` | The 50 newest posts, with each network's status and live URL | Reads |
+| `list_posts` | Posts with each network's status and live URL — filter by `status` and a `from`/`to` scheduled-date range, page with `cursor`, and read `total` for the real count | Reads |
 | `get_post` | One post in full: text, per-network copy and options, media, and each send's result or error | Reads |
 | `update_post` | Replaces a draft, scheduled or failed post with what you send | Changes; publishes with `now` or `schedule` |
 | `reschedule_post` | Moves a draft or scheduled post to a new date and time | Publishes at the new time, including a draft |
@@ -435,8 +435,10 @@ The setup for Zapier, Make and n8n is in
   `list_accounts`, `whoami` and `get_platform_rules` share 60 a minute. Going
   over returns HTTP 429; wait a minute and try again.
 - **One post per `create_post` call**, with up to 20 media ids.
-- **`list_posts` returns the 50 newest posts**, with no filters or
-  paging.
+- **`list_posts` is paged.** 50 by default, 200 maximum. The reply carries
+  `total` (matching your filter) and `returned` (this page), plus `hasMore`
+  and `nextCursor`. Take counts from `total`, never from the page — and
+  filter with `status` and `from`/`to` rather than counting rows.
 - **The 90-day free trial.** Paid plans are not on sale yet; plans and what
   each includes are on the pricing page linked below.
 - **X** is available on every plan within a monthly number of posts that
