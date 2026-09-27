@@ -96,6 +96,7 @@ Every route below takes `Authorization: Bearer pk_live_…`. The last column nam
 | GET | `/api/v1/media` | Your media library and storage use | `list_media` |
 | POST | `/api/v1/media/presign` | Checks a file and returns a one-time upload URL | `upload_media` |
 | POST | `/api/v1/media/confirm` | Verifies an uploaded file and adds it to your library | `upload_media` |
+| POST | `/api/v1/media/from-url` | Fetches a file from a public link and adds it to your library | `upload_media` |
 | GET | `/api/v1/analytics` | How your posts and accounts performed | `get_analytics` |
 
 Large video uploads use four more routes outside `/api/v1`, which also take the key: see [Large video: multipart upload](#large-video-multipart-upload).
@@ -285,7 +286,10 @@ These are iHatePosting's limits for storing a file. Each platform has its own li
 
 | Route | Size | Needs |
 |---|---|---|
-| MCP tool `upload_media` | Up to 8 MB, sent as base64 in the tool call | Nothing extra; the tool does all three steps for the agent |
+| MCP tool `upload_media` with `url` | Anything we can fetch, up to 100 MB | A public link to the file itself |
+| MCP tool `upload_media` with `base64` | Up to 8 MB, sent as base64 in the tool call — truncates, so never for a chat attachment | Nothing extra; the tool does all three steps for the agent |
+| MCP tool `open_upload_widget` | Whatever the browser will send | A host that renders MCP Apps widgets (Claude, ChatGPT) |
+| CLI `ihateposting upload <file>` | Up to 512 MB in one request | A shell and the file on disk |
 | `presign` → PUT → `confirm` | Images up to 25 MB, video up to 512 MB | A client that can PUT a file |
 | Multipart | Video up to 2,000 MB | A client that can PUT parts and read each part's `ETag` response header |
 

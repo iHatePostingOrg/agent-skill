@@ -72,7 +72,9 @@ to your posts and accounts.
 | `retry_post` | Sends again only what failed, on one network or all of them | Publishes |
 | `delete_post` | Removes iHatePosting's record of a post; a published post needs `force` | Deletes; never unpublishes |
 | `list_media` | Your media library, newest first, with the ids posts attach | Reads |
-| `upload_media` | Adds an image or video (base64, up to 8 MB) to the library and returns its id | Creates a library file |
+| `upload_media` | Adds an image or video to the library and returns its id — from a `url` (preferred, any size we can fetch) or as `base64` (up to 8 MB) | Creates a library file |
+| `open_upload_widget` | Shows a file picker in the conversation so the person can upload from their own device | Creates a library file |
+| `get_upload_ticket` | Internal — the upload box calls this itself for a one-time upload credential. Registered `visibility: ["app"]`, so a host hides it from the model and it is not a tool an agent calls | Issues a short-lived credential |
 | `list_pinterest_boards` | The Pinterest boards you can pin to, with the board id a pin needs | Reads |
 | `get_analytics` | How posts performed, per connected channel, over a range you choose | Reads |
 
@@ -296,9 +298,15 @@ behalf, so keep it out of chats, screenshots and shared files.
 
 ## Media
 
-- `upload_media` takes the file as base64, with an optional alt text, and
-  returns a library id to put in `mediaIds`. Through the agent the limit is
-  8 MB. Images can be JPEG, PNG, WebP or GIF; videos can be MP4, MOV or WebM.
+- `upload_media` takes either a `url` we fetch ourselves — preferred, and the
+  only route that works for a video of any real size — or the file as
+  `base64`, with an optional alt text, and returns a library id to put in
+  `mediaIds`. base64 through a conversation is capped at 8 MB and is the bytes
+  the model itself typed, so it truncates: never use it for a file that only
+  exists as a chat attachment. `open_upload_widget` covers that case by
+  showing a file picker in the conversation, and the `ihateposting upload
+  <path>` CLI command covers it for an agent with a shell. Images can be JPEG,
+  PNG, WebP or GIF; videos can be MP4, MOV or WebM.
 - `list_media` returns ids, sizes and dimensions of what is already uploaded,
   never a download link.
 - A post takes up to 20 media ids, attached in the order you give them.

@@ -164,6 +164,11 @@ const TOOLS = [
   "whoami", "list_accounts", "get_platform_rules", "validate_post", "create_post", "list_posts", "get_post",
   "update_post", "reschedule_post", "retry_post", "delete_post", "list_media", "upload_media",
   "list_pinterest_boards", "get_analytics",
+  // The in-chat upload box (MCP Apps, server 0.7.0). open_upload_widget is the
+  // one an agent calls; get_upload_ticket is registered visibility ["app"], so
+  // a host hides it from the model entirely and it is deliberately NOT
+  // documented in the README as something to call.
+  "open_upload_widget", "get_upload_ticket",
 ];
 const NETWORKS = ["Bluesky", "X", "LinkedIn", "Facebook", "Threads", "Mastodon", "Telegram", "Discord", "Tumblr", "Slack", "Instagram", "Pinterest", "TikTok", "YouTube"];
 const readme = existsSync(join(ROOT, "README.md")) ? readFileSync(join(ROOT, "README.md"), "utf8") : "";

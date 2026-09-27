@@ -6,7 +6,7 @@ compatibility: Needs an iHatePosting account and network access to ihateposting.
 metadata:
   last-updated: "2026-09-23"
   homepage: "https://ihateposting.com/guides/post-to-social-media-from-an-ai-agent"
-allowed-tools: mcp__plugin_ihateposting_ihateposting__whoami mcp__plugin_ihateposting_ihateposting__list_accounts mcp__plugin_ihateposting_ihateposting__get_platform_rules mcp__plugin_ihateposting_ihateposting__validate_post mcp__plugin_ihateposting_ihateposting__list_posts mcp__plugin_ihateposting_ihateposting__get_post mcp__plugin_ihateposting_ihateposting__list_media mcp__plugin_ihateposting_ihateposting__list_pinterest_boards Bash(ihateposting whoami *) Bash(ihateposting accounts *) Bash(ihateposting platforms *) Bash(ihateposting posts *)
+allowed-tools: mcp__plugin_ihateposting_ihateposting__whoami mcp__plugin_ihateposting_ihateposting__list_accounts mcp__plugin_ihateposting_ihateposting__get_platform_rules mcp__plugin_ihateposting_ihateposting__validate_post mcp__plugin_ihateposting_ihateposting__list_posts mcp__plugin_ihateposting_ihateposting__get_post mcp__plugin_ihateposting_ihateposting__list_media mcp__plugin_ihateposting_ihateposting__list_pinterest_boards Bash(ihateposting whoami *) Bash(ihateposting accounts *) Bash(ihateposting platforms *) Bash(ihateposting posts *) Bash(ihateposting upload *)
 ---
 
 # Posting with iHatePosting
@@ -111,9 +111,20 @@ what it reports, then call `create_post`.
 
 - Attach library ids through `mediaIds`, in order. `list_media` shows what is
   already in the library.
-- `upload_media` takes the file as base64, up to 8 MB. For anything larger,
-  ask the user to upload it in iHatePosting, then find it with `list_media`.
-  The media library has a storage limit per plan; a full library is refused
+- `upload_media` has two ways in, and the order matters. PREFER `url`: we
+  fetch the file ourselves, at full length, and it is the only way that works
+  for a video of any real size. Use `base64` only for something you generated
+  yourself and could generate again.
+- **Never send a file that exists only in this conversation as `base64`.**
+  Those bytes are your own output, your output has a length limit, and the
+  file arrives cut short — a corrupt image we will reject after you have spent
+  several minutes on it. There is no way to chunk around this; do not try.
+- What to do instead, in order: if you can run commands, `ihateposting upload
+  <path>` reads the file off disk and prints a media id. If the host shows
+  widgets, `open_upload_widget` puts a file picker in the conversation and the
+  person chooses the file themselves. Otherwise ask them to upload it in
+  iHatePosting and find it with `list_media`.
+- The media library has a storage limit per plan; a full library is refused
   with a sentence saying so.
 - Alt text is set per file with `upload_media`'s `altText`. Bluesky and
   Mastodon publish it on images and videos; Instagram, Tumblr, Slack and
