@@ -15,7 +15,7 @@ Rules that apply to every network:
 - **Options belong to a network, not an account.** Every account of that network in the post gets the same options. To give two Pinterest accounts different boards, create two posts.
 - **Keys are not checked when you send them.** A misspelled key is saved and then ignored. Copy the spellings below exactly.
 - **Some fields fill themselves.** When you leave them unset, `create_post` and `update_post` fill YouTube `ytTitle` (first line of the text, without links, hashtags or @handles) and `ytTags` (its hashtags), Pinterest `title` (first line) and `link` (first URL), and Tumblr `tumblrTags` (hashtags). A value you send always wins, including an empty string `""`.
-- **`validate_post` does not fill those fields.** Pass `ytTitle` yourself when validating a YouTube post, or it reports a missing title that `create_post` would have filled.
+- **`validate_post` does not fill those fields.** Send `ytTitle` yourself when validating a YouTube post, or it reports a missing title that `create_post` would have filled.
 - **When the checks run.** With action `schedule` or `now`, `create_post` and `update_post` run each network's checks and refuse the post with the first blocking problem. Drafts skip these checks, but the X link rule below applies to drafts too. `reschedule_post` does not run them when it turns a draft into a scheduled post. The publisher checks again just before sending and skips a send that fails.
 - **Check what was saved.** `get_post` returns each network's stored options, including the filled-in ones, and a `notice` when a send worked but part of it did not (for example, a refused YouTube thumbnail).
 
@@ -166,7 +166,7 @@ Traps: a video cannot be combined with photos. Up to 20 images.
 
 | Key | Values | Default | Notes |
 |---|---|---|---|
-| `boardId` | board id from `list_pinterest_boards` | **required** | The board must belong to the Pinterest account you post to; pass `accountId` to `list_pinterest_boards` when several are connected. |
+| `boardId` | board id from `list_pinterest_boards` | **required** | The board must belong to the Pinterest account you post to; give `list_pinterest_boards` an `accountId` when several are connected. |
 | `title` | string, up to 100 characters | first line of the text | |
 | `link` | URL starting with `http://` or `https://`, up to 2,048 characters | first URL in the text | Send `""` for a pin with no link. |
 | `coverAssetId` | image media id | first frame | Cover for a video pin. |

@@ -96,7 +96,7 @@ ask the user to paste a key into the chat.
 2. `get_platform_rules` gives each platform's character limit, media rules
    and required options (`requiredOptions`). The ones to know:
    - **Pinterest**: one image or video, and `boardId`. Get it from
-     `list_pinterest_boards` (pass `accountId` if several Pinterest accounts
+     `list_pinterest_boards` (give it `accountId` if several Pinterest accounts
      are connected).
    - **YouTube**: exactly one video, `ytTitle` (100 characters at most) and
      `ytMadeForKids` (true or false). Ask the user about made-for-kids; never
@@ -119,16 +119,16 @@ what it reports, then call `create_post`.
   does. `create_post` and `update_post` refuse a scheduled or publish-now
   post that fails these checks; a draft is saved without them.
 - `create_post` fills a missing YouTube `ytTitle` from the first line of the
-  text, but `validate_post` does not. Pass `ytTitle` to both.
+  text, but `validate_post` does not. Send `ytTitle` to both.
 - `create_post` `platforms` takes a platform name (every active account on
   that platform) or an account id from `list_accounts` (exactly that
   account). Its answer lists anything it could not match under `unresolved`.
   Tell the user about each one. Never report a platform as posted when it is
   listed there.
 - Each LinkedIn member profile and each LinkedIn Page is its own account. To
-  post as one Page only, pass that Page's account id; the name `linkedin`
+  post as one Page only, send that Page's account id; the name `linkedin`
   posts to every connected LinkedIn account.
-- `validate_post` takes platform NAMES only. Never pass an account id there.
+- `validate_post` takes platform NAMES only. Never send an account id there.
 - Scheduling: `action: "schedule"` with `scheduledDate` (YYYY-MM-DD) and
   `scheduledTime` (for example `9:00 AM`). Times are read in the account
   owner's iHatePosting timezone, not the user's device.
@@ -150,7 +150,7 @@ what it reports, then call `create_post`.
   S3, Drive and Dropbox links do) is fine.
 - **An image you generated is not the exception — it is the usual casualty.**
   It is the single most common thing to arrive truncated, and it almost always
-  has a URL of its own. Pass that URL. If an upload comes back saying the file
+  has a URL of its own. Send that URL. If an upload comes back saying the file
   looks incomplete, that means your own output was cut short: retry with the
   URL rather than handing the job to the person.
 - **Never send a file that exists only in this conversation as `base64`.**
@@ -217,7 +217,7 @@ what it reports, then call `create_post`.
   broke a network rule, fix the post instead. If the account needs reconnecting, the answer says so
   and retrying will not help until the user reconnects.
 - `delete_post` removes iHatePosting's record only. It never unpublishes, and
-  it refuses a published post unless you pass `force: true`. Before that, tell
+  it refuses a published post unless you set `force: true`. Before that, tell
   the user the post will stay live on the network. A post that is publishing
   at that moment cannot be deleted.
 
@@ -227,7 +227,7 @@ For a series (one post a day for a week, say), treat each post on its own:
 
 - Run `validate_post` on each one with its own `action`, date and time. A
   plan's monthly allowance and X's daily and monthly limits count the day a
-  post is due, so a batch can pass for one day and fail for another.
+  post is due, so a batch can be accepted for one day and refused for another.
 - Stay under 30 `create_post` calls a minute.
 - Report each post's result as you go, with anything under `unresolved`.
 - If one is refused for an allowance or a limit, stop and tell the user.
@@ -293,7 +293,7 @@ calling that tool again; do not retry in a loop.
 | An account is `needs_reauth` | The user must reconnect it | Say so; its sends are held until then |
 | A name under `unresolved` | No active account matched it | Tell the user; never report it as posted |
 | Refused on create or update | A network rule, in the network's words | Fix it or give that network an override |
-| `validate_post` says YouTube has no title | It does not fill `ytTitle` | Pass `ytTitle` to both tools |
+| `validate_post` says YouTube has no title | It does not fill `ytTitle` | Send `ytTitle` to both tools |
 | "The file looks incomplete" | A base64 upload was cut short | Upload by `url` instead |
 | A send stays `pending` after its time | It is held: the account needs reconnecting, or the network is limiting it | If the account is `needs_reauth`, tell the user to reconnect it; a network's limit clears by itself |
 | A send is `skipped` | It broke a rule at publish time, or the trial ended | Read its error; fix, do not retry |

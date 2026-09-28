@@ -5,6 +5,23 @@ Every release of this package, newest first. Versions follow
 one (`scripts/check.mjs` refuses a release where they differ). From 0.5.0
 on, each version tag gets a GitHub Release with the notes below.
 
+## 0.5.2 — 2026-09-28
+
+- **Claude's plugin directory clears the plugin.** 0.5.1 was still held under
+  "Uses a credential from the user's machine" with the same 3 findings, so
+  the command-line fallback was not the cause. The directory named what it
+  had matched: "the installer's pass $$". `pass` is also the Unix password
+  manager, and ten phrases in the skill read like it: "pass `accountId`",
+  "Pass `ytTitle` to both", "unless you pass `force: true`" and so on. They
+  were in exactly the two files it flagged, SKILL.md and
+  references/platform-options.md, and nowhere else. All ten now say send,
+  give, set or accept, with the same meaning. Checked before release: the
+  directory validated a branch with only this change and reported no policy
+  holds.
+- Run against the same checks, gitroomhq/postiz-agent is held for 9 findings
+  of this kind and is listed anyway, so a hold goes to a reviewer rather than
+  refusing a plugin. Ours no longer needs one.
+
 ## 0.5.1 — 2026-09-28
 
 - **The skill no longer falls back to the command line.** Claude's plugin
