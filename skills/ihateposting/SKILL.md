@@ -2,20 +2,19 @@
 name: ihateposting
 description: Draft, check, schedule and publish social posts to Bluesky, X, LinkedIn, Facebook, Instagram, Threads, Pinterest, TikTok, YouTube, Mastodon, Telegram, Discord, Tumblr and Slack through the iHatePosting MCP tools. Use when the user asks to post, cross-post, schedule, draft, reschedule or retry a post, or to see what is going out and how it did.
 license: MIT
-compatibility: Needs an iHatePosting account and network access to ihateposting.com. Claude, Cursor, Gemini CLI and Grok Build sign in through the browser and need no key; the ihateposting CLI and other key-based setups use an API key (pk_live_...). Uses the iHatePosting MCP server this plugin adds; the ihateposting CLI (npm i -g ihateposting) is a fallback when the MCP tools are unavailable.
+compatibility: Needs an iHatePosting account and network access to ihateposting.com. Uses the iHatePosting MCP server this plugin adds; Claude, Cursor, Gemini CLI and Grok Build sign in to it through the browser and need no key.
 metadata:
   last-updated: "2026-09-28"
   homepage: "https://ihateposting.com/guides/post-to-social-media-from-an-ai-agent"
   openclaw: {"emoji": "💔", "homepage": "https://ihateposting.com/ai-agents/openclaw", "requires": {"bins": [], "env": []}}
-allowed-tools: mcp__plugin_ihateposting_ihateposting__whoami mcp__plugin_ihateposting_ihateposting__list_accounts mcp__plugin_ihateposting_ihateposting__get_platform_rules mcp__plugin_ihateposting_ihateposting__validate_post mcp__plugin_ihateposting_ihateposting__list_posts mcp__plugin_ihateposting_ihateposting__get_post mcp__plugin_ihateposting_ihateposting__list_media mcp__plugin_ihateposting_ihateposting__list_pinterest_boards Bash(ihateposting whoami *) Bash(ihateposting accounts *) Bash(ihateposting platforms *) Bash(ihateposting posts *) Bash(ihateposting upload *)
+allowed-tools: mcp__plugin_ihateposting_ihateposting__whoami mcp__plugin_ihateposting_ihateposting__list_accounts mcp__plugin_ihateposting_ihateposting__get_platform_rules mcp__plugin_ihateposting_ihateposting__validate_post mcp__plugin_ihateposting_ihateposting__list_posts mcp__plugin_ihateposting_ihateposting__get_post mcp__plugin_ihateposting_ihateposting__list_media mcp__plugin_ihateposting_ihateposting__list_pinterest_boards
 ---
 
 # Posting with iHatePosting
 
 iHatePosting sends posts to the social accounts the user has connected at
 ihateposting.com. This plugin gives you its tools over MCP (server
-`ihateposting`). Everything below uses those tools; the command-line
-equivalents are at the end.
+`ihateposting`). Everything below uses those tools.
 
 ## Rule one: nothing goes live unless the user said so
 
@@ -78,8 +77,8 @@ Otherwise call `whoami`. What it returns is the user's iHatePosting login,
 not a social media handle. The handles from `list_accounts` belong to the
 connected profiles and may carry other people's names.
 
-For a key-based setup (the command line, the local npm server, or an agent
-set up with a key from its ihateposting.com page):
+For a key-based setup (the local npm server, or an agent set up with a key
+from its ihateposting.com page):
 
 - "No API key" means the client sent no key at all.
 - "iHatePosting API 401" means the key is wrong or has been replaced, or the
@@ -158,11 +157,10 @@ what it reports, then call `create_post`.
   Those bytes are your own output, your output has a length limit, and the
   file arrives cut short — a corrupt image we will reject after you have spent
   several minutes on it. There is no way to chunk around this; do not try.
-- What to do instead, in order: if you can run commands, `ihateposting upload
-  <path>` reads the file off disk and prints a media id. If the host shows
-  widgets, `open_upload_widget` puts a file picker in the conversation and the
-  person chooses the file themselves. Otherwise ask them to upload it in
-  iHatePosting and find it with `list_media`.
+- What to do instead, in order: if the host shows widgets,
+  `open_upload_widget` puts a file picker in the conversation and the person
+  chooses the file themselves. Otherwise ask them to upload it in iHatePosting
+  and find it with `list_media`.
 - The media library has a storage limit per plan; a full library is refused
   with a sentence saying so.
 - Alt text is set per file with `upload_media`'s `altText`. Bluesky and
@@ -324,41 +322,6 @@ calling that tool again; do not retry in a loop.
 - Never invent a link. If a URL is needed and you do not have it, ask.
 - If a post is too long for one platform, shorten it or give that platform an
   override. Do not quietly drop a platform the user asked for.
-
-## Command-line fallback
-
-If the MCP tools are unavailable, the `ihateposting` command does the same
-work from a shell — including media, which it reads off disk. That makes it
-the answer when someone names a file on their own computer: nothing reachable
-over MCP can read their filesystem, but a command running on their machine
-can. Install it with `npm i -g ihateposting` (or `pnpm add -g ihateposting`),
-or run it without installing as `npx ihateposting <command>`.
-
-```bash
-ihateposting help                                          # the commands and main flags
-ihateposting whoami                                        # which account the key belongs to
-ihateposting accounts                                      # add --json to read the output
-ihateposting platforms
-ihateposting upload "C:\clips\launch.mp4" --alt "..."      # prints a media id
-ihateposting post "text" --to bluesky,linkedin --now --check   # see the note below
-ihateposting post "text" --to bluesky,linkedin             # draft
-ihateposting post "text" --to instagram --media "$ID"      # attach what you uploaded
-ihateposting post "text" --to x --at "2026-10-01 9:00 AM"  # scheduled
-ihateposting post "text" --to x --now                      # PUBLISHES: ask first
-ihateposting posts --status scheduled                      # and read the total it prints
-ihateposting skill --print                                 # the command line's own short skill
-```
-
-**Give `--check` the flags you are about to post with.** It validates the
-command exactly as written, so a bare `--check` checks a *draft* — and a draft
-is never counted against a plan's limits. Pass `--now` or `--at` and any
-`--media`, or it will answer "looks good" to a question you did not ask.
-
-The command line cannot set per-network options yet: no Pinterest board, no
-YouTube made-for-kids answer, no thread. For those, use the MCP tools.
-
-It signs in with a key: `ihateposting login <key>` saves it in
-`~/.ihateposting/config.json`, and `ihateposting logout` forgets it.
 
 ## More
 

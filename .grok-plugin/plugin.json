@@ -1,6 +1,6 @@
 {
   "name": "ihateposting",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Schedule and publish to 14 social networks from Grok Build through the hosted iHatePosting MCP server. You sign in with your iHatePosting account the first time a tool runs; there is no key to set.",
   "author": {
     "name": "iHatePosting",

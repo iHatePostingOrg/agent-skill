@@ -312,8 +312,10 @@ npx skills add https://github.com/ihatepostingorg/agent-skill --skill ihateposti
 ```
 
 That copies the skill only. It does not connect the iHatePosting server:
-connect that as your agent's set-up page describes, or use the `ihateposting`
-command line ([below](#other-ways-to-connect)), which the skill falls back to.
+connect that as your agent's set-up page describes. The skill works through
+the server's tools; the `ihateposting` command line
+([below](#other-ways-to-connect)) is a separate tool with its own
+instructions (`ihateposting skill --print`).
 
 </details>
 

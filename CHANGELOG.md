@@ -5,6 +5,27 @@ Every release of this package, newest first. Versions follow
 one (`scripts/check.mjs` refuses a release where they differ). From 0.5.0
 on, each version tag gets a GitHub Release with the notes below.
 
+## 0.5.1 — 2026-09-28
+
+- **The skill no longer falls back to the command line.** Claude's plugin
+  directory still held 0.5.0 for review under "Uses a credential from the
+  user's machine", with 3 findings (down from 8). Read on the directory's own
+  results page: the trigger was one line of the command-line section,
+  `--media "$ID"`, which the scanner reads as the skill taking a variable
+  from the user's environment. The skill also names a remote host
+  (github.com links), so it was held as "a credential beside a remote url";
+  `references/platform-options.md` was flagged only as part of the same
+  skill, and `plugin.json` as the same finding plus the MCP server's
+  address. The whole section is gone, with its `Bash(ihateposting …)`
+  entries in `allowed-tools` and the compatibility line's key and CLI
+  wording; no `$` is left anywhere in the skill. The plugin now works only
+  through the server it adds, which every supported agent signs in to
+  through the browser. For a file on the user's own computer the skill
+  offers the upload box (`open_upload_widget`) and otherwise asks the person
+  to upload it at ihateposting.com. The command line itself is unchanged and
+  still documented in the README, with its own instructions
+  (`ihateposting skill --print`).
+
 ## 0.5.0 — 2026-09-28
 
 - **Cursor and Grok Build sign in too.** Their MCP servers pointed at
