@@ -1,0 +1,12 @@
+# Operating-system files. Claude's plugin directory refuses a plugin folder
+# that contains any of these, and we edit this repo on Windows and macOS.
+.DS_Store
+Thumbs.db
+desktop.ini
+__MACOSX/
+
+# Nothing here is built or installed; keep local tooling out of the plugin.
+node_modules/
+.env
+.env.*
+*.log

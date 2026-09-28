@@ -23,7 +23,7 @@ The plugin in this repository talks to iHatePosting through its hosted MCP serve
 ## Authentication
 
 1. In iHatePosting, open **Settings → Developers** and create an API key.
-2. Copy it straight away. The full key is shown once. iHatePosting stores only a hash of it.
+2. Copy it. You can show it again later from the same page; iHatePosting keeps it encrypted for that. A key made before keys could be shown again (late September 2026) has no stored copy: the page says so, and regenerating gives you one that can be shown.
 3. Send it on every request:
 
 ```
@@ -73,6 +73,7 @@ Limits count requests per iHatePosting login, not per key, in fixed 60-second wi
 | 120 | `GET /api/v1/media` |
 | 30, shared | `POST /api/v1/media/presign` and `POST /api/media/multipart/create` together |
 | 60 | `POST /api/v1/media/confirm` |
+| 20 | `POST /api/v1/media/from-url` |
 | 600 | `POST /api/media/multipart/parts`, `/complete` and `/abort` together |
 | 60 | `GET /api/v1/analytics` |
 
@@ -198,7 +199,7 @@ A draft skips those checks, with one exception: unless you are on a paid Pro pla
 
 ### GET /api/v1/posts
 
-Your 50 most recently created posts, newest first. Each has `id`, `baseContent`, `status`, `scheduledAt`, `publishedAt` and `targets`, where each target has `id`, `platform`, `status`, `externalUrl` (the live post, once published) and `error`. Deleted posts are left out. There are no filters and no paging.
+Your posts, 50 to a page by default (`?limit=` 1 to 200). Filter with `?status=` and `?from=`/`?to=` (the scheduled date, inclusive whole days), and page with `?cursor=` set to the previous page's `nextCursor`. With a date filter or `status=scheduled` the list runs in calendar order, earliest first; otherwise it is newest created first. The reply carries `total` (every post matching the filter), `returned`, `hasMore` and `nextCursor`, so count from `total`, never from the page. Each post has `id`, `baseContent`, `status`, `scheduledAt`, `publishedAt` and `targets`, where each target has `id`, `platform`, `status`, `externalUrl` (the live post, once published) and `error`. Deleted posts are left out.
 
 ### GET /api/v1/posts/{id}
 
@@ -228,10 +229,10 @@ The field names differ from creating:
 
 **Posts to several accounts split when they are scheduled.** A draft to three accounts is one post. When a PATCH schedules it or sends it now, it becomes one post per account, sharing a `batchId`. The response is `{ "ok": true, "posts": 3, "batchId": "…" }`. After that:
 
-- PATCH on any one of those posts is refused with `409`, because editing one row of the group would publish some platforms twice. Edit it in the iHatePosting app, or delete the posts and create them again.
+- PATCH on one of those posts can change its text, options and media, as long as you send that post's own `accountIds`. Adding or swapping an account is refused with `409`, because that would change the group through one row of it; edit the group in the iHatePosting app instead.
 - Reschedule and delete act on the one post you name, not the group.
 
-`POST /api/v1/posts` never splits: it creates one post with one target per account.
+`POST /api/v1/posts` splits the same way: a post to several accounts created with `action` `schedule` or `now` becomes one post per account, listed under `posts` with a shared `batchId`. A draft stays one post.
 
 ### DELETE /api/v1/posts/{id}
 
@@ -286,7 +287,7 @@ These are iHatePosting's limits for storing a file. Each platform has its own li
 
 | Route | Size | Needs |
 |---|---|---|
-| MCP tool `upload_media` with `url` | Anything we can fetch, up to 100 MB | A public link to the file itself |
+| MCP tool `upload_media` with `url`, or `POST /api/v1/media/from-url` | Up to 100 MB; images up to 25 MB | A public link to the file itself |
 | MCP tool `upload_media` with `base64` | Up to 8 MB, sent as base64 in the tool call — truncates, so never for a chat attachment | Nothing extra; the tool does all three steps for the agent |
 | MCP tool `open_upload_widget` | Whatever the browser will send | A host that renders MCP Apps widgets (Claude, ChatGPT) |
 | CLI `ihateposting upload <file>` | Up to 512 MB in one request | A shell and the file on disk |
@@ -296,6 +297,15 @@ These are iHatePosting's limits for storing a file. Each platform has its own li
 ### GET /api/v1/media
 
 Every file in your library, newest first, with `id`, `kind`, `mime`, `width`, `height`, `durationSec`, `sizeBytes`, `altText`, `storageKey`, `createdAt`, a `url` and a `thumbUrl`, plus a `usage` object for the whole library. The `url` is a public link to the stored file: treat it as shareable, and keep it out of logs you would not publish. There is no paging.
+
+### Upload from a link
+
+```
+POST /api/v1/media/from-url
+{ "url": "https://example.com/launch.mp4", "filename": "launch.mp4", "altText": "Product demo, 40 seconds" }
+```
+
+We fetch the file ourselves and run the same checks as confirm. It can be an image, a video, or a PDF for a LinkedIn document post. `url` is required (up to 2,048 characters); `filename` (up to 200) and `altText` (up to 1,000) are optional. The answer is the same as confirm's: `201` and `{ "asset": { "id": "MEDIA_ID", … } }`. A link that cannot be reached, needs a sign-in or serves an empty file gets `400` with the reason; the wrong kind of file gets `415`, and one that is too large gets `413`. A file still arriving after 60 seconds, or one whose download breaks off, gets `504`, and nothing is saved. Up to 20 of these a minute.
 
 ### Upload with presign, PUT and confirm
 
@@ -425,8 +435,6 @@ function isFromIHatePosting(rawBody, signatureHeader, secret) {
 So that nothing here surprises you later:
 
 - Creating, rotating and revoking API keys, and managing webhooks, happen in the browser only.
-- `GET /api/v1/posts` has no filters or paging. It returns the 50 most recent posts.
 - There is no per-post analytics endpoint. Analytics is per account, over a date range.
-- Media must be uploaded as bytes. There is no upload from a URL.
 - You cannot turn a scheduled post back into a draft. Delete it, or reschedule it.
-- Each call creates one post. There is no batch create.
+- Each call is one submission; there is no batch create. A scheduled or sent post to several accounts is stored as one post per account.

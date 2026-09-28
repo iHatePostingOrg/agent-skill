@@ -1,0 +1,67 @@
+name: release
+
+# A GitHub Release for every version tag, with that version's CHANGELOG notes.
+#
+# Why: tags v0.3.4 and v0.4.0 were pushed without a Release, so the latest
+# Release stayed v0.3.3 — and `gemini extensions install <this repo>` installs
+# the latest RELEASE, not the default branch. Gemini users were two versions
+# behind without anyone noticing. From here on a tag cannot ship without one.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # The same gate as every push: manifests, sign-in configs, skill, examples.
+      - run: node scripts/check.mjs
+
+      - name: The tag must match the manifests, and the notes must be dated
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          manifest=$(node -p "require('./.claude-plugin/plugin.json').version")
+          if [ "$version" != "$manifest" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match the manifests ($manifest)."; exit 1
+          fi
+          heading=$(grep -m1 "^## $version\b" CHANGELOG.md || true)
+          if [ -z "$heading" ]; then echo "CHANGELOG.md has no '## $version' section."; exit 1; fi
+          case "$heading" in
+            *unreleased*) echo "CHANGELOG.md still says '$heading'; date it before tagging."; exit 1 ;;
+          esac
+          # The section's body: everything up to the next '## ' heading.
+          awk -v h="$heading" 'index($0, h) == 1 { on = 1; next } on && /^## / { exit } on { print }' CHANGELOG.md > notes.md
+          test -s notes.md
+
+      # github-script signs in with the workflow's own token by default, so
+      # this file names no credential at all.
+      - name: Publish the Release (skipped if it already exists)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const tag = context.ref.replace("refs/tags/", "");
+            const repo = { owner: context.repo.owner, repo: context.repo.repo };
+            try {
+              await github.rest.repos.getReleaseByTag({ ...repo, tag });
+              core.info(`Release ${tag} already exists.`);
+              return;
+            } catch (e) {
+              if (e.status !== 404) throw e;
+            }
+            await github.rest.repos.createRelease({
+              ...repo,
+              tag_name: tag,
+              name: tag,
+              body: fs.readFileSync("notes.md", "utf8"),
+              make_latest: "true",
+            });

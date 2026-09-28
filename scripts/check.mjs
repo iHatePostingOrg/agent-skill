@@ -5,10 +5,9 @@ import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const MCP_URL = "https://ihateposting.com/mcp";
-/* The same server, reached the other way: this endpoint answers 401 with a
-   WWW-Authenticate pointing at our protected-resource metadata, which is how
-   an OAuth client finds the sign-in. Used by Claude and Gemini CLI — see below. */
+/* The address every agent in this package uses: this endpoint answers 401
+   with a WWW-Authenticate pointing at our protected-resource metadata, which
+   is how an OAuth client finds the sign-in — see below. */
 const OAUTH_MCP_URL = "https://ihateposting.com/mcp/oauth";
 const problems = [];
 const fail = (msg) => problems.push(msg);
@@ -29,26 +28,28 @@ const readJson = (rel) => {
   }
 };
 
-// 1. One MCP file per agent, each filling in the key its own way.
-const EXPECTED = {
-  /* Each file also declares WHICH client it is, as ?client=<id> on the URL.
-     An API key names a person, never an app, so without this every connector
-     reaches iHatePosting anonymously and its admin can only show a key prefix.
-     The id is checked exactly, not just "has a query string": a copy-pasted
-     file that still claims to be Cursor is the whole failure this guards. */
-  "mcp.cursor.json": { auth: "Bearer ${IHATEPOSTING_API_KEY}", client: "cursor" },
-  "mcp.grok.json": { auth: "Bearer ${IHATEPOSTING_API_KEY}", client: "grok" },
-};
-const checkServer = (where, s, auth, client) => {
-  if (!s) return fail(`${where}: no "ihateposting" server`);
-  const want = `${MCP_URL}?client=${client}`;
-  if (s.url !== want) fail(`${where}: url is ${JSON.stringify(s.url)}, expected ${want}`);
-  if (s.type !== "http") fail(`${where}: type is ${JSON.stringify(s.type)}, expected "http"`);
-  if (s.headers?.Authorization !== auth) fail(`${where}: Authorization is ${JSON.stringify(s.headers?.Authorization)}, expected ${JSON.stringify(auth)}`);
-};
-for (const [file, { auth, client }] of Object.entries(EXPECTED)) {
-  const j = readJson(file);
-  if (j) checkServer(file, j.mcpServers?.ihateposting, auth, client);
+// 1. One MCP file per agent — and since 0.5.0 every one of them signs in.
+/* CURSOR AND GROK BUILD SIGN IN TOO (0.5.0, 2026-09-28). They sent a Bearer
+   header filled from the API-key environment variable: a credential read from
+   the user's environment and sent to a server, which Claude's plugin directory holds for
+   review ("Uses a credential from the user's machine", 8 findings) and xAI's
+   catalog review treats as exfiltration. Both clients run OAuth themselves
+   against a bare URL — Cursor with dynamic registration by default
+   (cursor.com/docs/mcp), Grok Build likewise for plugin servers
+   (xai-org/grok-build crates/codegen/xai-grok-mcp/src/oauth.rs) — and our
+   server already accepts their redirect URIs (lib/oauth/core.ts upstream).
+   No ?client=: the admin feed names an OAuth call by the client name the
+   client registered itself with, so a tag adds nothing — and the URL has to
+   stay exactly the resource the server's metadata describes. */
+for (const file of ["mcp.cursor.json", "mcp.grok.json"]) {
+  const s = readJson(file)?.mcpServers?.ihateposting;
+  if (!s) {
+    fail(`${file}: no "ihateposting" server`);
+    continue;
+  }
+  if (s.url !== OAUTH_MCP_URL) fail(`${file}: url is ${JSON.stringify(s.url)}, expected ${OAUTH_MCP_URL}`);
+  if (s.type !== "http") fail(`${file}: type is ${JSON.stringify(s.type)}, expected "http"`);
+  if (s.headers) fail(`${file}: no headers — this agent signs in with OAuth, and a key header is a credential read from the user's machine`);
 }
 /* Claude signs in with OAuth, like Gemini CLI below, and never with a key.
    A key needs the plugin's userConfig, and only terminal Claude Code asks for
@@ -85,24 +86,47 @@ for (const [file, mcp] of Object.entries(manifests)) {
 }
 const claude = readJson(".claude-plugin/plugin.json");
 if (claude?.userConfig) fail(".claude-plugin/plugin.json: no userConfig — Claude signs in with OAuth, so there is no key for anyone to paste");
+if (!/^https:\/\//.test(claude?.privacyPolicyUrl ?? "")) fail(".claude-plugin/plugin.json: privacyPolicyUrl must be an https URL — the directory warns without one");
 const cursor = readJson(".cursor-plugin/plugin.json");
-if (cursor && !(cursor.variables?.properties?.IHATEPOSTING_API_KEY && cursor.variables?.required?.includes("IHATEPOSTING_API_KEY"))) {
-  fail(".cursor-plugin/plugin.json: variables must declare IHATEPOSTING_API_KEY as required");
-}
+if (cursor?.variables) fail(".cursor-plugin/plugin.json: no variables — Cursor signs in with OAuth, so there is no key to configure");
 if (cursor?.author && Object.keys(cursor.author).some((x) => !["name", "email"].includes(x))) {
   fail(".cursor-plugin/plugin.json: Cursor's schema allows only name and email in author");
 }
-if (cursor?.logo && !existsSync(join(ROOT, cursor.logo))) fail(`.cursor-plugin/plugin.json: logo ${cursor.logo} does not exist`);
+/* THE LOGO IS AN SVG (0.5.0). A PNG is a binary the directory's scanner
+   cannot read as code, so every reference to it (the README's <img>, a path
+   in backticks, this manifest) was held for review. An SVG is a text file —
+   which also means it IS read, so it must stay inert: no script, no event
+   handler, nothing fetched from elsewhere. url(#…) to its own gradient is fine. */
+for (const [file, logo] of [[".cursor-plugin/plugin.json", cursor?.logo], [".grok-plugin/plugin.json", readJson(".grok-plugin/plugin.json")?.logo]]) {
+  if (!logo) {
+    fail(`${file}: needs a logo`);
+    continue;
+  }
+  if (!logo.endsWith(".svg")) fail(`${file}: logo ${logo} must be the SVG`);
+  if (!existsSync(join(ROOT, logo))) fail(`${file}: logo ${logo} does not exist`);
+}
+for (const logo of new Set([cursor?.logo, readJson(".grok-plugin/plugin.json")?.logo].filter((l) => l && existsSync(join(ROOT, l))))) {
+  const svg = readFileSync(join(ROOT, logo), "utf8");
+  if (/<script|<foreignObject|<image|\son[a-z]+\s*=|(?:xlink:)?href\s*=|url\((?!#)|@import/i.test(svg)) {
+    fail(`${logo}: must be inert — no script, event handler, image, href or external url()`);
+  }
+}
+const grokMarket = readJson(".grok-plugin/marketplace.json");
+const gm = grokMarket?.plugins?.find((p) => p.name === "ihateposting");
+if (!gm || gm.source?.type !== "local" || gm.source?.path !== "./") {
+  fail('.grok-plugin/marketplace.json: needs the ihateposting plugin with source {"type":"local","path":"./"}');
+}
+if (gm && !gm.domains?.includes("ihateposting.com")) fail(".grok-plugin/marketplace.json: domains must include ihateposting.com");
 const market = readJson(".claude-plugin/marketplace.json");
 if (market && !market.plugins?.some((p) => p.name === "ihateposting" && p.source === "./")) {
   fail(".claude-plugin/marketplace.json: needs the ihateposting plugin with source ./");
 }
-/* Gemini CLI is the one agent here that must NOT be handed the API key.
-   Its MCP header values are expanded against a SANITIZED environment
+/* Gemini CLI was the first agent here to stop taking the API key, because it
+   could not send our key variable: its MCP header values are expanded against a SANITIZED environment
    (gemini-cli packages/core/src/tools/mcp-client.ts, createTransportRequestInit),
    and packages/core/src/services/environmentSanitization.ts redacts any
-   variable whose NAME matches /KEY/i — which IHATEPOSTING_API_KEY does. A
-   redacted variable expands to "", so `Bearer ${IHATEPOSTING_API_KEY}` went
+   variable whose NAME matches /KEY/i — which our key variable does. A
+   redacted variable expands to "", so the Bearer header went
    out as a bare "Bearer " and every call 401'd. Nothing in Google's own docs
    mentions this; their worked example hardcodes the token.
 
@@ -143,8 +167,8 @@ for (const file of walk(ROOT).filter((p) => p.endsWith(".md"))) {
       fail(`${relative(ROOT, file)}: a cursor deeplink's config= is not valid base64 JSON`);
       continue;
     }
-    const want = `${MCP_URL}?client=cursor`;
-    if (cfg.url !== want) fail(`${relative(ROOT, file)}: cursor deeplink installs url ${JSON.stringify(cfg.url)}, expected ${want}`);
+    if (cfg.url !== OAUTH_MCP_URL) fail(`${relative(ROOT, file)}: cursor deeplink installs url ${JSON.stringify(cfg.url)}, expected ${OAUTH_MCP_URL}`);
+    if (cfg.headers) fail(`${relative(ROOT, file)}: cursor deeplink must carry no headers — Cursor signs in with OAuth`);
     if (/pk_live_/.test(b64) || /pk_live_/.test(JSON.stringify(cfg))) fail(`${relative(ROOT, file)}: a cursor deeplink carries a real API key`);
   }
 }
@@ -156,6 +180,14 @@ for (const f of [".mcp.json", "mcp.json", "plugin.json"]) {
   if (existsSync(join(ROOT, f))) fail(`${f} must not exist at the root (see README, "What is in this repository")`);
 }
 
+/* Files the directory refuses outright (macOS and Windows litter), and any
+   binary — the plugin ships text only, so nothing needs a reviewer's eye. */
+for (const p of walk(ROOT)) {
+  const rel = relative(ROOT, p).replaceAll("\\", "/");
+  if (/(^|\/)(\.DS_Store|Thumbs\.db|desktop\.ini)$|(^|\/)__MACOSX\//i.test(rel)) fail(`${rel}: an operating-system file; delete it`);
+  if (/\.(png|jpe?g|gif|webp|ico|pdf|zip|mcpb|dxt)$/i.test(rel)) fail(`${rel}: a binary file — the plugin ships text only`);
+}
+
 // 4. The skill.
 const SKILL = "skills/ihateposting/SKILL.md";
 const raw = readFileSync(join(ROOT, SKILL));
@@ -163,8 +195,10 @@ if (raw[0] === 0xef && raw[1] === 0xbb && raw[2] === 0xbf) fail(`${SKILL}: start
 const skill = raw.toString("utf8");
 if (!/^---\r?\n/.test(skill)) fail(`${SKILL}: --- must be the very first line`);
 // Gemini CLI fills ${...} in extension skills from its settings — this exact
-// text would put the user's real key into the model's context.
-if (skill.includes("${IHATEPOSTING_API_KEY}")) fail(`${SKILL}: contains \${IHATEPOSTING_API_KEY}; write the bare name instead`);
+// text would put the user's real key into the model's context. Built from
+// parts so this file does not itself contain the pattern it hunts for.
+const KEY_REF = "$" + "{IHATEPOSTING_API_KEY}";
+if (skill.includes(KEY_REF)) fail(`${SKILL}: contains ${KEY_REF}; write the bare name instead`);
 const fm = skill.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
 const field = (name) => fm.match(new RegExp(`^${name}:\\s*(.*)$`, "m"))?.[1]?.trim() ?? "";
 if (field("name") !== "ihateposting") fail(`${SKILL}: name must be ihateposting, the folder's name`);
@@ -186,6 +220,11 @@ const TOOLS = [
 const NETWORKS = ["Bluesky", "X", "LinkedIn", "Facebook", "Threads", "Mastodon", "Telegram", "Discord", "Tumblr", "Slack", "Instagram", "Pinterest", "TikTok", "YouTube"];
 const readme = existsSync(join(ROOT, "README.md")) ? readFileSync(join(ROOT, "README.md"), "utf8") : "";
 for (const t of TOOLS) if (!readme.includes(`\`${t}\``)) fail(`README.md: does not list the \`${t}\` tool`);
+// get_upload_ticket is app-only, so a model sees one tool fewer than TOOLS.
+const MODEL_TOOLS = TOOLS.length - 1;
+for (const m of readme.matchAll(/\b(\d+) tools\b/g)) {
+  if (Number(m[1]) !== MODEL_TOOLS) fail(`README.md: says "${m[0]}", but a model sees ${MODEL_TOOLS}`);
+}
 for (const n of NETWORKS) if (!new RegExp(`\\b${n}\\b`).test(readme)) fail(`README.md: does not mention ${n}`);
 // A backticked tool-shaped name in the skill must be a real tool.
 const toolShaped = /`((?:get|list|create|update|delete|retry|reschedule|upload|validate|publish|schedule|cancel|unschedule|remove|send)_[a-z_]+|whoami)`/g;
@@ -193,7 +232,7 @@ for (const f of walk(join(ROOT, "skills")).filter((p) => p.endsWith(".md"))) {
   const text = readFileSync(f, "utf8");
   for (const m of text.matchAll(toolShaped)) if (!TOOLS.includes(m[1])) fail(`${relative(ROOT, f)}: names \`${m[1]}\`, which is not an iHatePosting tool`);
   // Same leak as SKILL.md: Gemini CLI fills \${...} in every skill file it loads.
-  if (text.includes("${IHATEPOSTING_API_KEY}")) fail(`${relative(ROOT, f)}: contains \${IHATEPOSTING_API_KEY}; write the bare name instead`);
+  if (text.includes(KEY_REF)) fail(`${relative(ROOT, f)}: contains ${KEY_REF}; write the bare name instead`);
 }
 // Examples: valid JSON, and never publish by default.
 if (existsSync(join(ROOT, "examples"))) {
@@ -206,7 +245,6 @@ if (existsSync(join(ROOT, "examples"))) {
 
 // 6. No real key anywhere.
 for (const p of walk(ROOT)) {
-  if (p.endsWith(".png")) continue;
   if (/pk_live_[0-9a-zA-Z]{6,}/.test(readFileSync(p, "utf8"))) fail(`${relative(ROOT, p)}: contains what looks like a real API key`);
 }
 

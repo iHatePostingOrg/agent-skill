@@ -1,15 +1,16 @@
 {
   "name": "ihateposting",
   "displayName": "iHatePosting",
-  "version": "0.4.0",
-  "description": "Draft, check and schedule posts to 14 social networks from Cursor. Every post is a draft until you say otherwise.",
+  "version": "0.5.0",
+  "description": "Draft, check and schedule posts to 14 social networks from Cursor. You sign in with your iHatePosting account, and every post is a draft until you say otherwise.",
   "author": {
-    "name": "iHatePosting"
+    "name": "iHatePosting",
+    "email": "support@ihateposting.com"
   },
   "homepage": "https://ihateposting.com/guides/post-to-social-media-from-an-ai-agent",
   "repository": "https://github.com/iHatePostingOrg/agent-skill",
   "license": "MIT",
-  "logo": "assets/logo.png",
+  "logo": "assets/logo.svg",
   "keywords": [
     "ihateposting",
     "social-media",
@@ -32,18 +33,5 @@
     "tiktok",
     "youtube"
   ],
-  "variables": {
-    "type": "object",
-    "properties": {
-      "IHATEPOSTING_API_KEY": {
-        "type": "string",
-        "title": "iHatePosting API key",
-        "description": "Starts with pk_live_. Create one at ihateposting.com under Settings, Developers."
-      }
-    },
-    "required": [
-      "IHATEPOSTING_API_KEY"
-    ]
-  },
   "mcpServers": "./mcp.cursor.json"
 }

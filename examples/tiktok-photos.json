@@ -1,0 +1,18 @@
+{
+  "text": "Five small changes that made our kitchen easier to cook in.",
+  "platforms": [
+    "tiktok"
+  ],
+  "action": "draft",
+  "mediaIds": [
+    "JPEG_OR_WEBP_ID_1_FROM_list_media",
+    "JPEG_OR_WEBP_ID_2_FROM_list_media",
+    "JPEG_OR_WEBP_ID_3_FROM_list_media"
+  ],
+  "options": {
+    "tiktok": {
+      "tiktokPrivacy": "private",
+      "tiktokAutoAddMusic": true
+    }
+  }
+}

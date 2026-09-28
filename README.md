@@ -1,12 +1,46 @@
-<img src="assets/logo.png" alt="iHatePosting logo" width="72">
+![iHatePosting logo](assets/logo.svg)
 
 # iHatePosting for AI agents
 
 Let Claude, Claude Code, Cursor, Gemini CLI or Grok Build draft, check,
 schedule and publish posts on 14 social networks, using the accounts you have
 connected at [ihateposting.com](https://ihateposting.com). This package gives
-each agent the hosted iHatePosting MCP server (15 tools) and a skill that teaches it to
-post safely.
+each agent the hosted iHatePosting MCP server (16 tools) and a skill that
+teaches it to post safely. Every agent here signs in with your iHatePosting
+account; none of them needs an API key.
+
+Set-up pages for every agent:
+[Claude](https://ihateposting.com/ai-agents/claude) ·
+[Claude Code](https://ihateposting.com/ai-agents/claude-code) ·
+[Claude Cowork](https://ihateposting.com/ai-agents/claude-cowork) ·
+[ChatGPT](https://ihateposting.com/ai-agents/chatgpt) ·
+[Codex](https://ihateposting.com/ai-agents/codex) ·
+[Cursor](https://ihateposting.com/ai-agents/cursor) ·
+[Gemini CLI](https://ihateposting.com/ai-agents/gemini-cli) ·
+[Grok Build](https://ihateposting.com/ai-agents/grok-build) ·
+[VS Code and GitHub Copilot](https://ihateposting.com/ai-agents/vs-code) ·
+[OpenClaw](https://ihateposting.com/ai-agents/openclaw) ·
+[Hermes Agent](https://ihateposting.com/ai-agents/hermes-agent) ·
+[DeepSeek Harness](https://ihateposting.com/ai-agents/deepseek-harness) ·
+[Perplexity Computer](https://ihateposting.com/ai-agents/perplexity-computer) ·
+[Muse](https://ihateposting.com/ai-agents/muse) ·
+[NanoClaw](https://ihateposting.com/ai-agents/nanoclaw) ·
+[Paperclip](https://ihateposting.com/ai-agents/paperclip) ·
+[Antigravity CLI](https://ihateposting.com/ai-agents/antigravity-cli) ·
+[Amp](https://ihateposting.com/ai-agents/amp) ·
+[Cline](https://ihateposting.com/ai-agents/cline) ·
+[Kilo Code](https://ihateposting.com/ai-agents/kilo-code) ·
+[Zed](https://ihateposting.com/ai-agents/zed) ·
+[Warp](https://ihateposting.com/ai-agents/warp) ·
+[Devin Desktop](https://ihateposting.com/ai-agents/devin-desktop) ·
+[OpenHands CLI](https://ihateposting.com/ai-agents/openhands-cli) ·
+[Freebuff CLI](https://ihateposting.com/ai-agents/freebuff-cli) ·
+[omp](https://ihateposting.com/ai-agents/omp) ·
+[all of them](https://ihateposting.com/ai-agents)
+
+Some of those pages add the server by hand, with an API key; for Claude,
+Claude Code, Cursor, Gemini CLI and Grok Build, the plugin in this repository
+signs in instead ([Install](#install)).
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![npm: ihateposting-mcp](https://img.shields.io/npm/v/ihateposting-mcp?label=ihateposting-mcp)](https://www.npmjs.com/package/ihateposting-mcp)
@@ -55,8 +89,8 @@ use. Webhooks come with every plan too.
 
 ## Tools
 
-The hosted server offers these 15 tools. The last column is what a tool does
-to your posts and accounts.
+The hosted server offers these 16 tools, plus one the upload box uses by
+itself. The last column is what a tool does to your posts and accounts.
 
 | Tool | What it does | Effect |
 |------|--------------|--------|
@@ -72,7 +106,7 @@ to your posts and accounts.
 | `retry_post` | Sends again only what failed, on one network or all of them | Publishes |
 | `delete_post` | Removes iHatePosting's record of a post; a published post needs `force` | Deletes; never unpublishes |
 | `list_media` | Your media library, newest first, with the ids posts attach | Reads |
-| `upload_media` | Adds an image or video to the library and returns its id — from a `url` (preferred, any size we can fetch) or as `base64` (up to 8 MB) | Creates a library file |
+| `upload_media` | Adds an image or video to the library and returns its id — from a `url` (preferred; up to 100 MB, images up to 25 MB) or as `base64` (up to 8 MB) | Creates a library file |
 | `open_upload_widget` | Shows a file picker in the conversation so the person can upload from their own device | Creates a library file |
 | `get_upload_ticket` | Internal — the upload box calls this itself for a one-time upload credential. Registered `visibility: ["app"]`, so a host hides it from the model and it is not a tool an agent calls | Issues a short-lived credential |
 | `list_pinterest_boards` | The Pinterest boards you can pin to, with the board id a pin needs | Reads |
@@ -131,16 +165,17 @@ Reels, carousels, YouTube, Pinterest, TikTok and more. Every one is a draft.
 
 ## Install
 
-Claude and Gemini CLI sign you in in the browser and need no key. For Cursor
-and Grok Build, get an API key first ([below](#get-an-api-key)).
+Every agent below signs you in to your iHatePosting account in the browser.
+None of them needs an API key.
 
-| Agent | How it installs | Where the key goes |
-|-------|-----------------|--------------------|
-| Claude (claude.ai, desktop app, Cowork) | **Customize → Plugins**, adding this repository as a marketplace | No key — you sign in in the browser |
-| Claude Code | `/plugin install` from this repository's marketplace | No key — you sign in in the browser |
-| Cursor | Cursor Marketplace once listed, or `~/.cursor/mcp.json` | `IHATEPOSTING_API_KEY` |
-| Gemini CLI | `gemini extensions install` | No key — you sign in in the browser |
-| Grok Build | `grok plugin install ... --trust` | `IHATEPOSTING_API_KEY` in your environment |
+| Agent | How it installs | How it connects |
+|-------|-----------------|-----------------|
+| Claude (claude.ai, desktop app, Cowork) | **Customize → Plugins**, adding this repository as a marketplace | You sign in in the browser |
+| Claude Code | `/plugin install` from this repository's marketplace | You sign in in the browser |
+| Cursor | Cursor Marketplace once listed, a local copy, or `~/.cursor/mcp.json` | You sign in in the browser |
+| Gemini CLI | `gemini extensions install` | You sign in in the browser |
+| Grok Build | `grok plugin install ... --trust` | You sign in in the browser |
+| Any agent that reads skills | `npx skills add` (the skill only) | Connect the server as that agent's page says |
 | ChatGPT and others | Their own MCP settings | See the [setup guide](https://ihateposting.com/guides/post-to-social-media-from-an-ai-agent) |
 
 <details>
@@ -179,32 +214,34 @@ browser window opens: sign in to your iHatePosting account and press
 <details>
 <summary><strong>Cursor</strong></summary>
 
-Once the plugin is listed in the Cursor Marketplace, install it and set
-`IHATEPOSTING_API_KEY` under **Plugins → Configure**. On a Cursor team, check
-whether that value is stored per person before an admin sets it: an
-iHatePosting key acts as one person's account, so a shared value would make
-everyone post as that person.
+Once the plugin is listed in the Cursor Marketplace, install it from there.
+Cursor signs you in to your iHatePosting account in the browser; press
+**Allow**. Each person on a Cursor team signs in as themselves, so nobody
+posts from someone else's account. On a Cursor Enterprise plan with an MCP
+allowlist, allow `https://ihateposting.com/mcp/oauth`.
 
-To add the server by hand instead, put this in `~/.cursor/mcp.json`, set
-`IHATEPOSTING_API_KEY` in your environment and restart Cursor:
+Before the listing, install a local copy: put this repository in
+`~/.cursor/plugins/local/ihateposting`, then restart Cursor or run
+**Developer: Reload Window**.
+
+To add only the server by hand, put this in `~/.cursor/mcp.json` and restart
+Cursor:
 
 ```json
 {
   "mcpServers": {
     "ihateposting": {
       "type": "http",
-      "url": "https://ihateposting.com/mcp?client=cursor",
-      "headers": { "Authorization": "Bearer ${env:IHATEPOSTING_API_KEY}" }
+      "url": "https://ihateposting.com/mcp/oauth"
     }
   }
 }
 ```
 
-The same configuration as a one-click link (it holds the `${env:…}` reference,
-never a key):
+The same configuration as a one-click link:
 
 ```
-cursor://anysphere.cursor-deeplink/mcp/install?name=ihateposting&config=eyJ0eXBlIjoiaHR0cCIsInVybCI6Imh0dHBzOi8vaWhhdGVwb3N0aW5nLmNvbS9tY3A/Y2xpZW50PWN1cnNvciIsImhlYWRlcnMiOnsiQXV0aG9yaXphdGlvbiI6IkJlYXJlciAke2VudjpJSEFURVBPU1RJTkdfQVBJX0tFWX0ifX0=
+cursor://anysphere.cursor-deeplink/mcp/install?name=ihateposting&config=eyJ0eXBlIjoiaHR0cCIsInVybCI6Imh0dHBzOi8vaWhhdGVwb3N0aW5nLmNvbS9tY3Avb2F1dGgifQ==
 ```
 
 </details>
@@ -221,12 +258,12 @@ sign in to iHatePosting and approve, and it keeps the token in
 `~/.gemini/mcp-oauth-tokens.json`, refreshing it as needed. Sign in again
 later with `/mcp auth ihateposting`.
 
-This is the one agent here that does not take a key, and that is deliberate.
-Gemini CLI expands `${...}` in MCP headers against a sanitized environment and
-blanks any variable whose name contains KEY, TOKEN, SECRET or AUTH, so an
-`Authorization: Bearer ${IHATEPOSTING_API_KEY}` header leaves as a bare
-`Bearer ` and the call fails — silently, with nothing in Google's docs to warn
-you. Signing in avoids the problem rather than working around it.
+Gemini CLI could not have taken our key from a header anyway: it expands
+`${...}` in MCP headers against a sanitized environment and blanks any
+variable whose name contains KEY, TOKEN, SECRET or AUTH, so a header built
+from our key variable would leave empty and every call would fail, with
+nothing in Google's docs to warn you. Signing in avoids the problem rather
+than working around it.
 
 The extension uses `url` with `type: "http"`, the form Gemini CLI 0.21 and
 later reads as Streamable HTTP.
@@ -236,40 +273,62 @@ later reads as Streamable HTTP.
 <details>
 <summary><strong>Grok Build</strong></summary>
 
-Grok Build cannot ask for a secret, so the key comes from your environment.
-Set it in the shell that starts `grok`, then install:
-
 ```bash
-export IHATEPOSTING_API_KEY=pk_live_...
 grok plugin install iHatePostingOrg/agent-skill --trust
 ```
 
 A plugin's MCP server stays off until the plugin is trusted, which is what
-`--trust` does.
+`--trust` does. The first time a tool runs, Grok Build opens your browser to
+sign in to your iHatePosting account; press **Allow**. To sign in again
+later, open `/mcps` and press `i` on iHatePosting.
 
 </details>
 
 <details>
 <summary><strong>Other agents</strong></summary>
 
-ChatGPT, VS Code with GitHub Copilot, Codex, Windsurf, Zed, Cline, OpenClaw
-and more connect to the same server without this package. The setup for each is at
-[ihateposting.com/guides/post-to-social-media-from-an-ai-agent](https://ihateposting.com/guides/post-to-social-media-from-an-ai-agent).
+ChatGPT, VS Code with GitHub Copilot, Codex, OpenClaw, Hermes Agent,
+DeepSeek Harness, Perplexity Computer, Zed, Cline and more connect to the same
+server without this package. Each has a set-up page (the list at the top of
+this README), and the
+[setup guide](https://ihateposting.com/guides/post-to-social-media-from-an-ai-agent)
+covers them all.
 
 OpenClaw's documentation says it reads a package with a `.cursor-plugin/`
 folder as a Cursor bundle, so installing this repository there is not
-expected to add the MCP server. Use OpenClaw's own MCP setup from the guide
+expected to add the MCP server. Use OpenClaw's own MCP setup from its page
 instead.
+
+</details>
+
+<details>
+<summary><strong>Any agent that reads skills</strong></summary>
+
+The skill is listed on [skills.sh](https://www.skills.sh/ihatepostingorg/agent-skill/ihateposting),
+so an agent that reads skills can take it from there:
+
+```bash
+npx skills add https://github.com/ihatepostingorg/agent-skill --skill ihateposting
+```
+
+That copies the skill only. It does not connect the iHatePosting server:
+connect that as your agent's set-up page describes, or use the `ihateposting`
+command line ([below](#other-ways-to-connect)), which the skill falls back to.
 
 </details>
 
 ## Get an API key
 
+None of the agents above needs one. A key is for the `ihateposting` command
+line, the local npm server, the REST API, and agents that cannot sign in.
+
 Sign in at [ihateposting.com](https://ihateposting.com), open **Settings →
-Developers** and create a key. It starts with `pk_live_` and is shown in full
-only once, so copy it then. There is one key per account: making a new one
-switches the old one off everywhere it is used. The key can post on your
-behalf, so keep it out of chats, screenshots and shared files.
+Developers** and create a key. It starts with `pk_live_`, and you can show it
+again later from the same page (a key made before keys could be shown again,
+in late September 2026, cannot be; the page says so, and regenerating gives
+you one that can). There is one key per account:
+regenerating switches the old one off everywhere it is used. The key can post
+on your behalf, so keep it out of chats, screenshots and shared files.
 
 ## Safety
 
@@ -288,10 +347,13 @@ behalf, so keep it out of chats, screenshots and shared files.
   `validate_post` first.
 - **A scheduled post cannot go back to being a draft.** `update_post` refuses
   that. Delete the post and create it again as a draft.
-- **Scheduling a multi-network post splits it.** When `update_post` schedules
-  or publishes a post that targets more than one account, it becomes one post
-  per account. After that, `update_post` refuses them, and `reschedule_post`
-  and `delete_post` act on one of them at a time.
+- **Scheduling a multi-network post splits it.** When `create_post` or
+  `update_post` schedules or publishes a post for more than one account, it
+  becomes one post per account, sharing a group id; `create_post`'s answer
+  lists each one. A draft stays one post. After the split, `reschedule_post`
+  and `delete_post` act on one of them at a time, and `update_post` can change
+  one's text, options and media as long as you send that post's own
+  `accountIds` — adding or swapping an account is refused.
 - **Deleting never unpublishes.** `delete_post` removes iHatePosting's record
   only. A published post is refused unless `force` is set, and it stays live on
   the network. A post that is publishing right now cannot be deleted.
@@ -302,11 +364,16 @@ behalf, so keep it out of chats, screenshots and shared files.
   pre-approves only the tools that read, so anything that creates, changes,
   publishes or deletes asks first unless your own permission settings allow
   it. Cursor, Gemini CLI and Grok Build apply their own approval settings.
+- **Social accounts are connected at ihateposting.com, never through an
+  agent.** Each network's own sign-in page handles the password, and posts go
+  out through each network's official API, the same way the iHatePosting app
+  sends them. An agent never sees a social login.
 
 ## Media
 
 - `upload_media` takes either a `url` we fetch ourselves — preferred, and the
-  only route that works for a video of any real size — or the file as
+  only route that works for a video of any real size (up to 100 MB; images up
+  to 25 MB) — or the file as
   `base64`, with an optional alt text, and returns a library id to put in
   `mediaIds`. base64 through a conversation is capped at 8 MB and is the bytes
   the model itself typed, so it truncates: never use it for a file that only
@@ -315,7 +382,7 @@ behalf, so keep it out of chats, screenshots and shared files.
   <path>` CLI command covers it for an agent with a shell. Images can be JPEG,
   PNG, WebP or GIF; videos can be MP4, MOV or WebM.
 - `list_media` returns ids, sizes and dimensions of what is already uploaded,
-  never a download link.
+  never a download link. (The REST `GET /api/v1/media` does include one.)
 - A post takes up to 20 media ids, attached in the order you give them.
 - Larger files: upload them at ihateposting.com and find them with
   `list_media`, or use the REST upload routes, which take images up to 25 MB
@@ -353,7 +420,7 @@ measure at all, so a missing number is not mistaken for no reach.
 ## Other ways to connect
 
 **Local MCP server (npm).** For clients that start a local process, the same
-15 tools run from [`ihateposting-mcp`](https://www.npmjs.com/package/ihateposting-mcp):
+16 tools run from [`ihateposting-mcp`](https://www.npmjs.com/package/ihateposting-mcp):
 
 ```json
 {
@@ -371,21 +438,34 @@ measure at all, so a missing number is not mistaken for no reach.
 `https://ihateposting.com`).
 
 **Command line.** [`ihateposting`](https://www.npmjs.com/package/ihateposting)
-(`npm i -g ihateposting`) posts text only; it has no media option. Its
-commands are `login`, `logout`, `whoami`, `accounts`, `platforms`, `posts`,
-`post` and `skill`:
+(`npm i -g ihateposting`, or `npx ihateposting <command>` without installing)
+drafts, checks, schedules and publishes, uploads files off disk, and lists
+posts. Its commands are `login`, `logout`, `whoami`, `accounts`, `platforms`,
+`posts`, `upload`, `post` and `skill`; `ihateposting help` lists the commands
+and the main flags.
 
 ```bash
 ihateposting login <key>                                   # saved in ~/.ihateposting/config.json
-ihateposting post "text" --to bluesky,linkedin --check     # validates, creates nothing
-ihateposting post "text" --to bluesky,linkedin             # draft
+ihateposting whoami                                        # which account the key belongs to
+ihateposting accounts --json                               # connected accounts, with ids
+ihateposting upload ./launch.mp4 --alt "Product demo"      # prints a media id
+ihateposting post "text" --to bluesky,linkedin --check     # validates this draft, creates nothing
+ihateposting post "text" --to instagram --media "$ID"      # draft with the uploaded file
+ihateposting post "text" --to x --at "2026-10-01 9:00 AM" --check   # check the scheduled version first
 ihateposting post "text" --to x --at "2026-10-01 9:00 AM"  # scheduled
+ihateposting posts --status scheduled --from 2026-12-01 --to 2026-12-31   # prints the total too
 ihateposting skill                                         # writes .claude/skills/ihateposting/SKILL.md
 ```
 
-In CI, set `IHATEPOSTING_API_KEY` instead of running `login`. `--now`
-publishes at once. `ihateposting skill --print` prints the CLI's own skill
-instead of writing it.
+`--check` validates the command exactly as written, so give it the same
+`--now` or `--at` you will post with. `--now` publishes at once. The command
+line cannot set per-network options yet, so a Pinterest board or YouTube's
+made-for-kids answer needs the MCP tools or the REST API. Every command exits
+0 on success and 1 on failure. `ihateposting skill --print` prints the CLI's
+own skill instead of writing it. The settings the command line and the npm
+server read are listed in their own READMEs on npm
+([ihateposting](https://www.npmjs.com/package/ihateposting),
+[ihateposting-mcp](https://www.npmjs.com/package/ihateposting-mcp)).
 
 **A URL with the key in it.** Some connector dialogs accept only a URL, with
 no field for a header. For those, the server also reads the key from the
@@ -412,7 +492,7 @@ key as `Authorization: Bearer pk_live_…`:
 | `GET`, `PATCH`, `DELETE /api/v1/posts/{id}` | `get_post`, `update_post`, `delete_post` |
 | `POST /api/v1/posts/{id}/reschedule` | `reschedule_post` |
 | `POST /api/v1/posts/{id}/retry` | `retry_post` |
-| `GET /api/v1/media`, `POST /api/v1/media/presign`, `POST /api/v1/media/confirm` | `list_media`, `upload_media` |
+| `GET /api/v1/media`, `POST /api/v1/media/presign`, `POST /api/v1/media/confirm`, `POST /api/v1/media/from-url` | `list_media`, `upload_media` |
 | `GET /api/v1/pinterest/boards` | `list_pinterest_boards` |
 | `GET /api/v1/analytics` | `get_analytics` |
 
@@ -459,13 +539,19 @@ Plans and prices: [ihateposting.com/pricing](https://ihateposting.com/pricing).
 
 - **The tools are missing.** The agent is not signed in. On claude.ai and in
   Cowork, connect iHatePosting from the plugin's **Connectors** tab; in Claude
-  Code, run `/mcp` and choose **Authenticate**; in Gemini CLI, run
-  `/mcp auth ihateposting`. None of these use a key.
-- **The tools say "No API key".** The client sent no key. In Cursor and Grok
-  Build, set `IHATEPOSTING_API_KEY`.
-- **"iHatePosting API 401".** The key is wrong, has been replaced by a newer
-  one, or the client sent an unfilled placeholder instead of the key. Check
-  the client's setting before assuming the key was revoked.
+  Code, run `/mcp` and choose **Authenticate**; in Cursor, sign in from its MCP
+  settings; in Gemini CLI, run `/mcp auth ihateposting`; in Grok Build, open
+  `/mcps` and press `i`. None of these use a key.
+- **Coming from 0.4.x on Cursor or Grok Build?** Those plugins used to send an
+  API key. They now sign in instead, once, as above. The plugin no longer
+  reads the key you set for 0.4.x, so you can remove it from Cursor's plugin
+  settings or your shell profile. If nothing else uses that key, regenerate it
+  under Settings → Developers so the old one stops working.
+- **"No API key" from the command line or the npm server.** It was given no
+  key. Run `ihateposting login <key>`.
+- **"iHatePosting API 401" on a key-based setup.** The key is wrong, has been
+  replaced by a newer one, or the client sent an unfilled placeholder instead
+  of the key. Check the client's setting before assuming the key was revoked.
 - **An account shows `needs_reauth`.** It has to be reconnected on the
   Accounts page at ihateposting.com; an agent cannot do that. Its pending
   sends are held, and go out once the same account is reconnected. A send
@@ -498,45 +584,65 @@ Plans and prices: [ihateposting.com/pricing](https://ihateposting.com/pricing).
 
 ## Network endpoints and credentials
 
-- This package calls one server, by one of two paths: `https://ihateposting.com/mcp`
-  for the agents that send an API key (Cursor, Grok Build), and
-  `https://ihateposting.com/mcp/oauth` for Claude and Gemini CLI, which sign
-  in instead. Both are MCP over Streamable HTTP.
-- The key path sends `Authorization: Bearer <key>`. Cursor keeps the key as a
-  plugin setting; Grok Build reads it from the `IHATEPOSTING_API_KEY`
-  environment variable.
-- The OAuth path sends no key at all. Claude and Gemini CLI discover the
-  sign-in from the server's own metadata, use PKCE and register themselves.
-  Each keeps its own token; Gemini CLI keeps it in
-  `~/.gemini/mcp-oauth-tokens.json`. The token can be revoked at
-  ihateposting.com under Settings → Developers.
+- Every agent in this package calls one address,
+  `https://ihateposting.com/mcp/oauth`: MCP over Streamable HTTP, with OAuth
+  sign-in. It sends no key. Each agent discovers the sign-in from the
+  server's own metadata, uses PKCE and registers itself, then keeps its own
+  token (Gemini CLI in `~/.gemini/mcp-oauth-tokens.json`, Grok Build in
+  `~/.grok/mcp_credentials.json`). Revoke a sign-in at ihateposting.com under
+  Settings → Developers.
+- `https://ihateposting.com/mcp` is the same server for key-based setups (the
+  local npm server, agents that cannot sign in), which send
+  `Authorization: Bearer <key>`. Nothing in this package uses it.
 - There are no hooks and no install scripts, and nothing runs on your machine.
+- What the server receives: the text, media and options of the posts you ask
+  for, and the requests to list, check, change or report on them. It sends
+  them on to the social networks you chose, through each network's official
+  API. The privacy policy is at
+  [ihateposting.com/privacy](https://ihateposting.com/privacy).
 
 ## What is in this repository
 
 | Path | For |
 |------|-----|
 | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `mcp.claude.json` | Claude (claude.ai, Cowork, Claude Code) |
-| `.cursor-plugin/plugin.json`, `mcp.cursor.json`, `assets/logo.png` | Cursor |
+| `.cursor-plugin/plugin.json`, `mcp.cursor.json` | Cursor |
 | `gemini-extension.json` | Gemini CLI |
-| `.grok-plugin/plugin.json`, `mcp.grok.json` | Grok Build |
+| `.grok-plugin/plugin.json`, `.grok-plugin/marketplace.json`, `mcp.grok.json` | Grok Build |
+| [assets/logo.svg](assets/logo.svg) | The logo Cursor and Grok Build show |
 | `skills/ihateposting/SKILL.md` | All four: how to post safely |
 | `skills/ihateposting/references/platform-options.md` | All four: each network's option keys, loaded when needed |
 | `docs/platforms.md` | What each network accepts, in full |
 | `docs/api.md` | The REST API |
 | `examples/` | Draft `create_post` payloads and how to use them |
 | `scripts/check.mjs`, `.github/workflows/check.yml` | The release check, run on every push |
+| `.github/workflows/release.yml` | Publishes a GitHub Release, with its changelog notes, for every version tag |
 | `CHANGELOG.md` | What changed in each release |
 
-Each agent has its own MCP file because each connects differently: Claude and
-Gemini CLI sign in with OAuth at `/mcp/oauth`, and Cursor and Grok Build send
-`IHATEPOSTING_API_KEY` to `/mcp`. There is deliberately no `.mcp.json` at the
-root. Directories that read one would install a server with an unfilled
-placeholder in place of a key.
+Each agent has its own MCP file, so that each manifest names exactly one
+server; all of them point at the same sign-in address. There is deliberately
+no `.mcp.json` at the root, so no tool picks up a server this package did not
+mean to give it.
 
 `node scripts/check.mjs` checks the manifests, the key handling, the skill and
 the examples before a release. It also checks that this README names every
 tool and network, and that every example is a draft.
+
+## Feedback and issues
+
+Report a problem or ask for something in
+[this repository's issues](https://github.com/iHatePostingOrg/agent-skill/issues),
+or write to us from [ihateposting.com/contact](https://ihateposting.com/contact).
+
+## Links
+
+- Website: [ihateposting.com](https://ihateposting.com)
+- Set-up pages for every agent: [ihateposting.com/ai-agents](https://ihateposting.com/ai-agents)
+- Setup guide: [Post to social media from an AI agent](https://ihateposting.com/guides/post-to-social-media-from-an-ai-agent)
+- REST API: [docs/api.md](docs/api.md)
+- Pricing: [ihateposting.com/pricing](https://ihateposting.com/pricing)
+- Privacy policy: [ihateposting.com/privacy](https://ihateposting.com/privacy)
+- Terms: [ihateposting.com/terms](https://ihateposting.com/terms)
 
 ## Changelog
 

@@ -1,6 +1,71 @@
 # Changelog
 
-## 0.4.0
+Every release of this package, newest first. Versions follow
+[Semantic Versioning](https://semver.org), and every manifest carries the same
+one (`scripts/check.mjs` refuses a release where they differ). From 0.5.0
+on, each version tag gets a GitHub Release with the notes below.
+
+## 0.5.0 — 2026-09-28
+
+- **Cursor and Grok Build sign in too.** Their MCP servers pointed at
+  `https://ihateposting.com/mcp` with a Bearer header filled from the
+  `IHATEPOSTING_API_KEY` variable: a credential read from the user's
+  environment and sent to a server. Claude's plugin directory held our 0.4.0
+  submission for review over exactly that ("Uses a credential from the
+  user's machine"), and xAI's catalog guidelines count it as sending a local
+  secret to the network. Both now use `https://ihateposting.com/mcp/oauth`
+  with no header, like Claude and Gemini CLI. Cursor's documentation says it
+  runs OAuth with dynamic client registration by default; Grok Build's source
+  (xai-org/grok-build, `xai-grok-mcp` oauth) does the same for plugin
+  servers; and our server already accepts both clients' redirect addresses. The Cursor `variables`
+  block is gone, and so is the Grok manifest's "set IHATEPOSTING_API_KEY"
+  line. Anyone on 0.4.x signs in once.
+- **The logo is an SVG.** A PNG is a file the directory's scanner cannot read,
+  so every reference to it was held for review. The new logo, an SVG, is
+  the brand mark as plain text, with no script and nothing fetched from
+  elsewhere, and the release check keeps it that way. Cursor and Grok Build
+  both name it, and the README shows it with Markdown image syntax.
+- **Directory listing details.** The Claude manifest names a privacy policy
+  and a support page, and the Claude, Cursor and Grok manifests give a
+  support address for their author.
+- **A Grok catalog entry** (`.grok-plugin/marketplace.json`) in the format
+  the README of xai-org/plugin-marketplace documents, with brand-only
+  keywords and the ihateposting.com domain.
+- **The skill** gains a short "usual order" list, a table of what each tool
+  does and which ones need the user's go-ahead, a "when something goes
+  wrong" table, guidance for scheduling several posts, the accepted file
+  types, how to post as one LinkedIn Page, and absolute links to the
+  examples and docs. Two statements were wrong and are fixed: a
+  multi-account post made with `create_post` DOES split into one post per
+  account when it is scheduled or published, and `update_post` CAN edit one
+  post of a split group as long as its accounts stay the same. The command
+  line section now says what the CLI cannot do yet (per-network options).
+  OpenClaw metadata was added to the frontmatter.
+- **The README** links every agent's set-up page, covers the skills.sh
+  install, a local Cursor install and the Grok sign-in, fixes the tool count
+  (16, not 15), the URL upload limit (100 MB, not "any size"), and the
+  command-line section (it has uploads and filters, not "text only"), and
+  adds a Links section and a Feedback section. It no longer tells 0.4.x
+  Cursor and Grok users to keep a key in their environment, and says how to
+  retire the key they set.
+- **docs/api.md** stops saying a key is shown only once (it can be shown
+  again), that the post list has no filters or paging, that there is no
+  upload from a link, and that `POST /api/v1/posts` never splits a
+  multi-account post and a split post cannot be edited. It documents
+  `POST /api/v1/media/from-url`, with its limit in the rate-limit table.
+- **Five more examples**, all drafts: an Instagram Story, an Instagram trial
+  reel, a Facebook Reel, a four-image LinkedIn post and a TikTok photo post;
+  and X reply settings on the thread example. The examples guide no longer
+  says `upload_media` needs a file of 8 MB or less, and prompts.md no longer
+  says `list_posts` is the 50 newest.
+- **Automation.** A `.gitignore` keeps macOS and Windows litter out (the
+  directory refuses a plugin that holds it), the release check refuses
+  binaries and litter and checks the README's tool count, and a new workflow
+  publishes a GitHub Release for every version tag from now on, so the
+  latest release cannot fall behind the tags again (it had: Gemini CLI was
+  installing 0.3.3, because v0.3.4 and v0.4.0 have no Release).
+
+## 0.4.0 — 2026-09-28
 
 - **Claude signs in instead of asking for a key.** The plugin's server is now
   `https://ihateposting.com/mcp/oauth`, the address iHatePosting's listing in
@@ -18,7 +83,7 @@
 - **The skill no longer calls the CLI a fallback for text-only posts.** It
   has uploaded media since `ihateposting upload` arrived (0.3.4).
 
-## 0.3.4
+## 0.3.4 — 2026-09-27
 
 - **`--check` was documented in the form that answers the wrong question.** The
   CLI fallback showed `post "text" --to bluesky,linkedin --check`, and a bare
@@ -45,7 +110,7 @@
   filesystem, but a command running on their machine can. Both are now in the
   example block.
 
-## 0.3.3
+## 0.3.3 — 2026-09-25
 
 - The Cursor **one-click install link** now installs the tagged URL too. 0.3.2
   updated every visible JSON block and missed this one, because its config is
@@ -60,7 +125,7 @@
   untagged URL and exact-matched it, so the release that added the tag failed
   its own test.
 
-## 0.3.2
+## 0.3.2 — 2026-09-25
 
 - The three key-based configs now say which tool they are, as `?client=` on
   the server URL: `claude-code`, `cursor` and `grok`. An API key identifies a
@@ -73,7 +138,7 @@
   `/mcp/oauth`, so it is already named by its own registration and has nothing
   to declare.
 
-## 0.3.1
+## 0.3.1 — 2026-09-23
 
 - The skill no longer tells a Gemini CLI user to fetch an API key. Gemini CLI
   discovers `skills/` at the extension root on its own — the official example
@@ -88,15 +153,15 @@
 - `compatibility` now says an account is what is required, and that most
   agents send a key while Gemini CLI signs in.
 
-## 0.3.0
+## 0.3.0 — 2026-09-23
 
 - Gemini CLI now signs in with OAuth instead of taking an API key, and the
   extension points at `https://ihateposting.com/mcp/oauth`. The key never
   worked there: Gemini CLI expands `${...}` in MCP headers against a
   sanitized environment and blanks any variable whose NAME matches
-  `/KEY/i`, `/TOKEN/i`, `/SECRET/i` or `/AUTH/i`, so
-  `Authorization: Bearer ${IHATEPOSTING_API_KEY}` was sent as a bare
-  `Bearer ` and every call returned 401. Nothing in Google's documentation
+  `/KEY/i`, `/TOKEN/i`, `/SECRET/i` or `/AUTH/i`, so the Authorization
+  header built from the key variable was sent as a bare `Bearer ` and every
+  call returned 401. Nothing in Google's documentation
   says this, and their own worked example hardcodes the token.
   (gemini-cli `packages/core/src/tools/mcp-client.ts` →
   `createTransportRequestInit`, and
@@ -113,7 +178,7 @@
   come back unnoticed.
 - The other three agents are unchanged and still send the API key.
 
-## 0.2.0
+## 0.2.0 — 2026-09-22
 
 - README now starts with what an agent can do, then lists the 15 tools, the
   14 networks, media, analytics, other ways to connect, the REST API,
@@ -132,7 +197,7 @@
   network, that the skill names only real tools, and that every example is a
   draft. `.github/workflows/check.yml` runs it on every push and pull request.
 
-## 0.1.0
+## 0.1.0 — 2026-09-22
 
 - First release: the plugin for Claude Code, Cursor, Gemini CLI and Grok
   Build, the hosted MCP server connection and the `ihateposting` skill.

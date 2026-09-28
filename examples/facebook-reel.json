@@ -1,0 +1,15 @@
+{
+  "text": "Forty seconds of the new assembly line, start to finish.",
+  "platforms": [
+    "facebook"
+  ],
+  "action": "draft",
+  "mediaIds": [
+    "VIDEO_ID_FROM_list_media"
+  ],
+  "options": {
+    "facebook": {
+      "fbType": "reel"
+    }
+  }
+}

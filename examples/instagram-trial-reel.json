@@ -1,0 +1,17 @@
+{
+  "text": "Testing a shorter cut of the studio tour before it goes to everyone.",
+  "platforms": [
+    "instagram"
+  ],
+  "action": "draft",
+  "mediaIds": [
+    "VIDEO_ID_FROM_list_media"
+  ],
+  "options": {
+    "instagram": {
+      "igType": "reel",
+      "igTrialReel": true,
+      "igGraduation": "manual"
+    }
+  }
+}

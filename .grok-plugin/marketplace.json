@@ -1,0 +1,30 @@
+{
+  "name": "ihateposting",
+  "description": "The iHatePosting plugin for Grok Build.",
+  "owner": {
+    "name": "iHatePosting",
+    "email": "support@ihateposting.com"
+  },
+  "plugins": [
+    {
+      "name": "ihateposting",
+      "source": {
+        "type": "local",
+        "path": "./"
+      },
+      "description": "Schedule and publish to 14 social networks from Grok Build through the hosted iHatePosting MCP server. You sign in with your iHatePosting account the first time a tool runs; there is no key to set.",
+      "category": "productivity",
+      "homepage": "https://ihateposting.com/ai-agents/grok-build",
+      "keywords": [
+        "ihateposting",
+        "ihateposting schedule",
+        "ihateposting publish",
+        "ihateposting draft",
+        "ihateposting analytics"
+      ],
+      "domains": [
+        "ihateposting.com"
+      ]
+    }
+  ]
+}

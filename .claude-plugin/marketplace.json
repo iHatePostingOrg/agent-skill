@@ -3,6 +3,7 @@
   "name": "ihateposting",
   "owner": {
     "name": "iHatePosting",
+    "email": "support@ihateposting.com",
     "url": "https://ihateposting.com"
   },
   "description": "The iHatePosting plugin for Claude.",

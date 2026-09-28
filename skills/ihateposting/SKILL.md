@@ -2,10 +2,11 @@
 name: ihateposting
 description: Draft, check, schedule and publish social posts to Bluesky, X, LinkedIn, Facebook, Instagram, Threads, Pinterest, TikTok, YouTube, Mastodon, Telegram, Discord, Tumblr and Slack through the iHatePosting MCP tools. Use when the user asks to post, cross-post, schedule, draft, reschedule or retry a post, or to see what is going out and how it did.
 license: MIT
-compatibility: Needs an iHatePosting account and network access to ihateposting.com. Claude and Gemini CLI sign in through the browser and need no key; Cursor and Grok Build send an API key (pk_live_...). Uses the iHatePosting MCP server this plugin adds; the ihateposting CLI (npm i -g ihateposting) is a fallback when the MCP tools are unavailable.
+compatibility: Needs an iHatePosting account and network access to ihateposting.com. Claude, Cursor, Gemini CLI and Grok Build sign in through the browser and need no key; the ihateposting CLI and other key-based setups use an API key (pk_live_...). Uses the iHatePosting MCP server this plugin adds; the ihateposting CLI (npm i -g ihateposting) is a fallback when the MCP tools are unavailable.
 metadata:
   last-updated: "2026-09-28"
   homepage: "https://ihateposting.com/guides/post-to-social-media-from-an-ai-agent"
+  openclaw: {"emoji": "💔", "homepage": "https://ihateposting.com/ai-agents/openclaw", "requires": {"bins": [], "env": []}}
 allowed-tools: mcp__plugin_ihateposting_ihateposting__whoami mcp__plugin_ihateposting_ihateposting__list_accounts mcp__plugin_ihateposting_ihateposting__get_platform_rules mcp__plugin_ihateposting_ihateposting__validate_post mcp__plugin_ihateposting_ihateposting__list_posts mcp__plugin_ihateposting_ihateposting__get_post mcp__plugin_ihateposting_ihateposting__list_media mcp__plugin_ihateposting_ihateposting__list_pinterest_boards Bash(ihateposting whoami *) Bash(ihateposting accounts *) Bash(ihateposting platforms *) Bash(ihateposting posts *) Bash(ihateposting upload *)
 ---
 
@@ -37,6 +38,22 @@ the user's own settings already allow it. Cursor, Gemini CLI and Grok Build
 use their own approval settings and may not ask. In every agent, get the
 user's go-ahead in words before a tool call that publishes.
 
+## The usual order
+
+1. **Sign-in**: `whoami` (see below if the tools are missing).
+2. **What is connected**: `list_accounts`.
+3. **The rules**: `get_platform_rules`, and `references/platform-options.md`
+   for a network's optional settings.
+4. **Media**, if any: `upload_media` with a `url`, or an id from `list_media`.
+5. **Check**: `validate_post` with the exact text, platforms, options, media,
+   action and date you mean to send.
+6. **Create**: `create_post`, a draft unless the user asked otherwise.
+7. **Report**: each platform's result, and anything under `unresolved`.
+8. **Later**: `list_posts` and `get_post` for what happened, `get_analytics`
+   for how it did.
+
+Each step is explained below.
+
 ## Check the sign-in first
 
 If none of the iHatePosting tools are available, the account was probably
@@ -46,19 +63,23 @@ never connected. How to connect depends on the agent:
   in Cowork, the user connects iHatePosting from the plugin's **Connectors**
   tab (Customize → Plugins → iHatePosting). In Claude Code, they run `/mcp`,
   pick the iHatePosting server and choose **Authenticate**.
+- **Cursor** signs in through the browser too, from its MCP settings.
 - **Gemini CLI** also signs in through the browser. If its tools are missing
   or answer 401, tell the user to run `/mcp auth ihateposting`.
-- **Grok Build and Cursor** send a key from the `IHATEPOSTING_API_KEY`
-  setting.
+- **Grok Build** signs in through the browser the first time a tool runs. To
+  sign in again, the user opens `/mcps` and presses `i` on iHatePosting.
 
-Never tell a Claude or Gemini CLI user to create or paste an API key: there is
-nowhere to put one.
+Never tell someone using this plugin in Claude, Cursor, Gemini CLI or Grok
+Build to create or paste an API key: there is nowhere to put one. If they
+added the server by hand with a key instead, the key-based guidance below
+applies.
 
 Otherwise call `whoami`. What it returns is the user's iHatePosting login,
 not a social media handle. The handles from `list_accounts` belong to the
 connected profiles and may carry other people's names.
 
-For the agents that send a key:
+For a key-based setup (the command line, the local npm server, or an agent
+set up with a key from its ihateposting.com page):
 
 - "No API key" means the client sent no key at all.
 - "iHatePosting API 401" means the key is wrong or has been replaced, or the
@@ -105,6 +126,9 @@ what it reports, then call `create_post`.
   account). Its answer lists anything it could not match under `unresolved`.
   Tell the user about each one. Never report a platform as posted when it is
   listed there.
+- Each LinkedIn member profile and each LinkedIn Page is its own account. To
+  post as one Page only, pass that Page's account id; the name `linkedin`
+  posts to every connected LinkedIn account.
 - `validate_post` takes platform NAMES only. Never pass an account id there.
 - Scheduling: `action: "schedule"` with `scheduledDate` (YYYY-MM-DD) and
   `scheduledTime` (for example `9:00 AM`). Times are read in the account
@@ -115,8 +139,10 @@ what it reports, then call `create_post`.
 
 ## Media
 
-- Attach library ids through `mediaIds`, in order. `list_media` shows what is
-  already in the library.
+- Attach library ids through `mediaIds`, in order (20 at most). `list_media`
+  shows what is already in the library.
+- Images can be JPEG, PNG, WebP or GIF (up to 25 MB); videos MP4, MOV or WebM.
+  Through `upload_media`'s `url`, a file can be up to 100 MB.
 - `upload_media` has two ways in, and the order matters. PREFER `url` —
   always, including for a picture you just generated: we fetch the file
   ourselves at full length, and it is the only thing that works for a video or
@@ -170,16 +196,17 @@ what it reports, then call `create_post`.
 - A scheduled post cannot go back to a draft. To unschedule it, delete it
   (that stops it going out) and create it again as a draft, after telling the
   user.
-- **Splitting.** When `update_post` saves a post for two or more accounts
-  with `action` "schedule" or "now", iHatePosting splits it into one post per
-  account, saved as a group. The answer gives only a count and a group id;
-  find the new posts with `list_posts`. After the split:
-  - `update_post` on any of them is refused. To change the text, delete the
-    posts and create them again, or ask the user to edit it in iHatePosting.
+- **Splitting.** When `create_post` or `update_post` saves a post for two or
+  more accounts with `action` "schedule" or "now", iHatePosting splits it into
+  one post per account, sharing a group id. `create_post`'s answer lists each
+  one under `posts`; after an `update_post`, find them with `list_posts`. A
+  draft is never split. After the split:
+  - `update_post` on one of them can change its text, options and media, as
+    long as you send that post's own `accountIds`. Adding or swapping an
+    account is refused; for that, ask the user to edit the group in
+    iHatePosting.
   - `reschedule_post` and `delete_post` act on the one post you name, which
     is one account's send. The others keep their time.
-  `create_post` never splits. A multi-platform post made with it stays one
-  post until an `update_post` schedules or publishes it.
 - `reschedule_post` moves a draft or scheduled post; a published one cannot
   be moved. On a draft it skips the platform-rule checks `create_post` runs
   for a scheduled post (the publisher still runs them at publish time and skips a send that
@@ -195,6 +222,18 @@ what it reports, then call `create_post`.
   it refuses a published post unless you pass `force: true`. Before that, tell
   the user the post will stay live on the network. A post that is publishing
   at that moment cannot be deleted.
+
+## Scheduling several posts
+
+For a series (one post a day for a week, say), treat each post on its own:
+
+- Run `validate_post` on each one with its own `action`, date and time. A
+  plan's monthly allowance and X's daily and monthly limits count the day a
+  post is due, so a batch can pass for one day and fail for another.
+- Stay under 30 `create_post` calls a minute.
+- Report each post's result as you go, with anything under `unresolved`.
+- If one is refused for an allowance or a limit, stop and tell the user.
+  Pressing on makes more of the same refusal.
 
 ## Afterwards
 
@@ -247,6 +286,36 @@ calling that tool again; do not retry in a loop.
 - X may refuse a post with a link, depending on the user's plan. The error
   says so; an X override without the link goes through.
 
+## When something goes wrong
+
+| What you see | What it means | What to do |
+|---|---|---|
+| No iHatePosting tools | Not signed in | See "Check the sign-in first" |
+| "iHatePosting API 401" | A key-based setup sent a bad or replaced key | Check the client's key setting |
+| An account is `needs_reauth` | The user must reconnect it | Say so; its sends are held until then |
+| A name under `unresolved` | No active account matched it | Tell the user; never report it as posted |
+| Refused on create or update | A network rule, in the network's words | Fix it or give that network an override |
+| `validate_post` says YouTube has no title | It does not fill `ytTitle` | Pass `ytTitle` to both tools |
+| "The file looks incomplete" | A base64 upload was cut short | Upload by `url` instead |
+| A send stays `pending` after its time | It is held: the account needs reconnecting, or the network is limiting it | If the account is `needs_reauth`, tell the user to reconnect it; a network's limit clears by itself |
+| A send is `skipped` | It broke a rule at publish time, or the trial ended | Read its error; fix, do not retry |
+| "iHatePosting API 429" | A per-minute limit | Wait a minute; never loop |
+
+## Tools at a glance
+
+| Tool | Does | Needs the user's go-ahead? |
+|---|---|---|
+| `whoami`, `list_accounts`, `get_platform_rules`, `list_pinterest_boards` | Reads | No |
+| `validate_post` | Checks a post, creates nothing | No |
+| `list_posts`, `get_post`, `list_media` | Reads | No |
+| `get_analytics` | Reads results; the first look at an account fetches them from the networks | No (the agent may still ask permission to run it) |
+| `create_post` | Creates a draft; publishes with `now` or `schedule` | Yes, to publish |
+| `update_post` | Replaces a post; publishes with `now` or `schedule` | Yes |
+| `reschedule_post` | Moves a post; a draft becomes scheduled | Yes |
+| `retry_post` | Resends failed sends | Yes |
+| `delete_post` | Removes our record, never unpublishes | Yes |
+| `upload_media`, `open_upload_widget` | Adds a file to the library | No |
+
 ## Writing the post
 
 - Write for the platform the user named. If you reuse one text everywhere,
@@ -258,23 +327,26 @@ calling that tool again; do not retry in a loop.
 
 ## Command-line fallback
 
-If the MCP tools are unavailable and the `ihateposting` command is installed,
-the same work can be done from a shell — including media, which it reads off
-disk. That makes it the answer when someone names a file on their own
-computer: nothing reachable over MCP can read their filesystem, but a command
-running on their machine can.
+If the MCP tools are unavailable, the `ihateposting` command does the same
+work from a shell — including media, which it reads off disk. That makes it
+the answer when someone names a file on their own computer: nothing reachable
+over MCP can read their filesystem, but a command running on their machine
+can. Install it with `npm i -g ihateposting` (or `pnpm add -g ihateposting`),
+or run it without installing as `npx ihateposting <command>`.
 
 ```bash
-ihateposting whoami
+ihateposting help                                          # the commands and main flags
+ihateposting whoami                                        # which account the key belongs to
 ihateposting accounts                                      # add --json to read the output
 ihateposting platforms
-ihateposting upload "C:\clips\launch.mp4"                  # prints a media id
+ihateposting upload "C:\clips\launch.mp4" --alt "..."      # prints a media id
 ihateposting post "text" --to bluesky,linkedin --now --check   # see the note below
 ihateposting post "text" --to bluesky,linkedin             # draft
 ihateposting post "text" --to instagram --media "$ID"      # attach what you uploaded
 ihateposting post "text" --to x --at "2026-10-01 9:00 AM"  # scheduled
 ihateposting post "text" --to x --now                      # PUBLISHES: ask first
 ihateposting posts --status scheduled                      # and read the total it prints
+ihateposting skill --print                                 # the command line's own short skill
 ```
 
 **Give `--check` the flags you are about to post with.** It validates the
@@ -282,5 +354,16 @@ command exactly as written, so a bare `--check` checks a *draft* — and a draft
 is never counted against a plan's limits. Pass `--now` or `--at` and any
 `--media`, or it will answer "looks good" to a question you did not ask.
 
-The CLI reads its key from `ihateposting login <key>`, or from the
-`IHATEPOSTING_API_KEY` environment variable.
+The command line cannot set per-network options yet: no Pinterest board, no
+YouTube made-for-kids answer, no thread. For those, use the MCP tools.
+
+It signs in with a key: `ihateposting login <key>` saves it in
+`~/.ihateposting/config.json`, and `ihateposting logout` forgets it.
+
+## More
+
+- Examples, ready to send as drafts:
+  https://github.com/iHatePostingOrg/agent-skill/tree/main/examples
+- The REST API: https://github.com/iHatePostingOrg/agent-skill/blob/main/docs/api.md
+- What each network accepts: https://github.com/iHatePostingOrg/agent-skill/blob/main/docs/platforms.md
+- Set-up pages for every agent: https://ihateposting.com/ai-agents

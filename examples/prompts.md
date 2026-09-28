@@ -81,8 +81,9 @@ agent says so before it deletes one.
 ## Checking what happened
 
 **13. "What's going out this week, and did anything fail?"**
-`list_posts`. It returns the 50 most recent posts with each platform's
-status, live URL or error, and the agent picks out this week's.
+`list_posts` with `from` and `to` set to this week (the scheduled date,
+inclusive), then read `total`. Each post carries every platform's status,
+live URL or error.
 
 **14. "Why did my TikTok post fail? If it's fixable, try again."**
 `get_post` → `retry_post`. `get_post` shows the error text for each platform.
