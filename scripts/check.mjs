@@ -151,6 +151,28 @@ if (gemini) {
   if (gemini.settings) fail("gemini-extension.json: no settings — signing in with OAuth means there is no key for anyone to paste");
   versions.add(gemini.version);
 }
+/* QWEN CODE (0.5.3) reads qwen-extension.json before anything else in the
+   repository. Without it, Qwen Code fell back to gemini-extension.json and
+   copied its server entry as it stood — and Qwen Code takes `url` to mean
+   the older SSE transport; only `httpUrl` means Streamable HTTP
+   (qwen-code packages/core/src/config/mcp-server-config.ts). `type` is
+   reserved there for "sdk". With `httpUrl` set, a 401 from the server marks
+   the server as needing sign-in, so no oauth block is needed. */
+const qwen = readJson("qwen-extension.json");
+if (qwen) {
+  if (qwen.name !== "ihateposting") fail("qwen-extension.json: name must be ihateposting");
+  const q = qwen.mcpServers?.ihateposting;
+  if (!q) {
+    fail('qwen-extension.json: no "ihateposting" server');
+  } else {
+    if (q.httpUrl !== OAUTH_MCP_URL) fail(`qwen-extension.json: httpUrl is ${JSON.stringify(q.httpUrl)}, expected ${OAUTH_MCP_URL}`);
+    if (q.url) fail("qwen-extension.json: no url — Qwen Code reads url as SSE, and this server speaks Streamable HTTP");
+    if (q.type) fail('qwen-extension.json: no type — Qwen Code reserves it for "sdk"');
+    if (q.headers) fail("qwen-extension.json: no headers — Qwen Code signs in with OAuth");
+  }
+  if (qwen.settings) fail("qwen-extension.json: no settings — signing in with OAuth means there is no key for anyone to paste");
+  versions.add(qwen.version);
+}
 /* THE ONE-CLICK INSTALL LINK, which is a config too — just base64'd inside a
    URL, so nothing above sees it and no human diff reads it.
    It was missed exactly that way on 2026-09-25: every visible JSON block got

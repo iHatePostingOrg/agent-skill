@@ -2,12 +2,12 @@
 
 # iHatePosting for AI agents
 
-Let Claude, Claude Code, Cursor, Gemini CLI or Grok Build draft, check,
-schedule and publish posts on 14 social networks, using the accounts you have
-connected at [ihateposting.com](https://ihateposting.com). This package gives
-each agent the hosted iHatePosting MCP server (16 tools) and a skill that
-teaches it to post safely. Every agent here signs in with your iHatePosting
-account; none of them needs an API key.
+Let Claude, Claude Code, Cursor, Gemini CLI, Grok Build or Qwen Code draft,
+check, schedule and publish posts on 14 social networks, using the accounts
+you have connected at [ihateposting.com](https://ihateposting.com). This
+package gives each agent the hosted iHatePosting MCP server (16 tools) and a
+skill that teaches it to post safely. Every agent here signs in with your
+iHatePosting account; none of them needs an API key.
 
 Set-up pages for every agent:
 [Claude](https://ihateposting.com/ai-agents/claude) ·
@@ -39,8 +39,8 @@ Set-up pages for every agent:
 [all of them](https://ihateposting.com/ai-agents)
 
 Some of those pages add the server by hand, with an API key; for Claude,
-Claude Code, Cursor, Gemini CLI and Grok Build, the plugin in this repository
-signs in instead ([Install](#install)).
+Claude Code, Cursor, Gemini CLI, Grok Build and Qwen Code, the plugin in this
+repository signs in instead ([Install](#install)).
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![npm: ihateposting-mcp](https://img.shields.io/npm/v/ihateposting-mcp?label=ihateposting-mcp)](https://www.npmjs.com/package/ihateposting-mcp)
@@ -175,6 +175,7 @@ None of them needs an API key.
 | Cursor | Cursor Marketplace once listed, a local copy, or `~/.cursor/mcp.json` | You sign in in the browser |
 | Gemini CLI | `gemini extensions install` | You sign in in the browser |
 | Grok Build | `grok plugin install ... --trust` | You sign in in the browser |
+| Qwen Code | `qwen extensions install` | You sign in in the browser |
 | Any agent that reads skills | `npx skills add` (the skill only) | Connect the server as that agent's page says |
 | ChatGPT and others | Their own MCP settings | See the [setup guide](https://ihateposting.com/guides/post-to-social-media-from-an-ai-agent) |
 
@@ -285,6 +286,27 @@ later, open `/mcps` and press `i` on iHatePosting.
 </details>
 
 <details>
+<summary><strong>Qwen Code</strong></summary>
+
+```bash
+qwen extensions install iHatePostingOrg/agent-skill:ihateposting
+```
+
+Then open `/mcp` in Qwen Code, select iHatePosting and choose
+**Authenticate**. A browser window opens: sign in to your iHatePosting account
+and press **Allow**. There is no key to paste. Qwen Code keeps the token in
+`~/.qwen/mcp-oauth-tokens.json` and refreshes it as needed; to sign in again
+later, choose **Re-authenticate** in the same place.
+
+The `:ihateposting` at the end names the plugin, so Qwen Code does not ask
+which one to install. It reads this repository's own `qwen-extension.json`,
+which adds the server and the skill. That file sets `httpUrl` rather than
+`url`, because Qwen Code reads a bare `url` as the older SSE transport, which
+this server does not speak.
+
+</details>
+
+<details>
 <summary><strong>Other agents</strong></summary>
 
 ChatGPT, VS Code with GitHub Copilot, Codex, OpenClaw, Hermes Agent,
@@ -365,7 +387,8 @@ on your behalf, so keep it out of chats, screenshots and shared files.
 - **Approval prompts depend on the agent.** In Claude Code the skill
   pre-approves only the tools that read, so anything that creates, changes,
   publishes or deletes asks first unless your own permission settings allow
-  it. Cursor, Gemini CLI and Grok Build apply their own approval settings.
+  it. Cursor, Gemini CLI, Grok Build and Qwen Code apply their own approval
+  settings.
 - **Social accounts are connected at ihateposting.com, never through an
   agent.** Each network's own sign-in page handles the password, and posts go
   out through each network's official API, the same way the iHatePosting app
@@ -543,7 +566,8 @@ Plans and prices: [ihateposting.com/pricing](https://ihateposting.com/pricing).
   Cowork, connect iHatePosting from the plugin's **Connectors** tab; in Claude
   Code, run `/mcp` and choose **Authenticate**; in Cursor, sign in from its MCP
   settings; in Gemini CLI, run `/mcp auth ihateposting`; in Grok Build, open
-  `/mcps` and press `i`. None of these use a key.
+  `/mcps` and press `i`; in Qwen Code, open `/mcp`, select iHatePosting and
+  choose **Authenticate**. None of these use a key.
 - **Coming from 0.4.x on Cursor or Grok Build?** Those plugins used to send an
   API key. They now sign in instead, once, as above. The plugin no longer
   reads the key you set for 0.4.x, so you can remove it from Cursor's plugin
@@ -591,7 +615,8 @@ Plans and prices: [ihateposting.com/pricing](https://ihateposting.com/pricing).
   sign-in. It sends no key. Each agent discovers the sign-in from the
   server's own metadata, uses PKCE and registers itself, then keeps its own
   token (Gemini CLI in `~/.gemini/mcp-oauth-tokens.json`, Grok Build in
-  `~/.grok/mcp_credentials.json`). Revoke a sign-in at ihateposting.com under
+  `~/.grok/mcp_credentials.json`, Qwen Code in
+  `~/.qwen/mcp-oauth-tokens.json`). Revoke a sign-in at ihateposting.com under
   Settings → Developers.
 - `https://ihateposting.com/mcp` is the same server for key-based setups (the
   local npm server, agents that cannot sign in), which send
@@ -611,9 +636,10 @@ Plans and prices: [ihateposting.com/pricing](https://ihateposting.com/pricing).
 | `.cursor-plugin/plugin.json`, `mcp.cursor.json` | Cursor |
 | `gemini-extension.json` | Gemini CLI |
 | `.grok-plugin/plugin.json`, `.grok-plugin/marketplace.json`, `mcp.grok.json` | Grok Build |
+| `qwen-extension.json` | Qwen Code |
 | [assets/logo.svg](assets/logo.svg) | The logo Cursor and Grok Build show |
-| `skills/ihateposting/SKILL.md` | All four: how to post safely |
-| `skills/ihateposting/references/platform-options.md` | All four: each network's option keys, loaded when needed |
+| `skills/ihateposting/SKILL.md` | All five: how to post safely |
+| `skills/ihateposting/references/platform-options.md` | All five: each network's option keys, loaded when needed |
 | `docs/platforms.md` | What each network accepts, in full |
 | `docs/api.md` | The REST API |
 | `examples/` | Draft `create_post` payloads and how to use them |

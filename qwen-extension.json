@@ -1,0 +1,12 @@
+{
+  "name": "ihateposting",
+  "displayName": "iHatePosting",
+  "version": "0.5.3",
+  "description": "Schedule and publish to 14 social networks from Qwen Code: check a draft against each network's limits, then post now, schedule it, or keep it as a draft.",
+  "mcpServers": {
+    "ihateposting": {
+      "description": "Hosted iHatePosting MCP server (Streamable HTTP, OAuth sign-in).",
+      "httpUrl": "https://ihateposting.com/mcp/oauth"
+    }
+  }
+}

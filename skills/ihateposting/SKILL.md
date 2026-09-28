@@ -2,7 +2,7 @@
 name: ihateposting
 description: Draft, check, schedule and publish social posts to Bluesky, X, LinkedIn, Facebook, Instagram, Threads, Pinterest, TikTok, YouTube, Mastodon, Telegram, Discord, Tumblr and Slack through the iHatePosting MCP tools. Use when the user asks to post, cross-post, schedule, draft, reschedule or retry a post, or to see what is going out and how it did.
 license: MIT
-compatibility: Needs an iHatePosting account and network access to ihateposting.com. Uses the iHatePosting MCP server this plugin adds; Claude, Cursor, Gemini CLI and Grok Build sign in to it through the browser and need no key.
+compatibility: Needs an iHatePosting account and network access to ihateposting.com. Uses the iHatePosting MCP server this plugin adds; Claude, Cursor, Gemini CLI, Grok Build and Qwen Code sign in to it through the browser and need no key.
 metadata:
   last-updated: "2026-09-28"
   homepage: "https://ihateposting.com/guides/post-to-social-media-from-an-ai-agent"
@@ -33,9 +33,9 @@ ihateposting.com. This plugin gives you its tools over MCP (server
 
 In Claude Code, this skill pre-approves only the tools that read, so Claude
 Code asks before anything that creates, changes, publishes or deletes, unless
-the user's own settings already allow it. Cursor, Gemini CLI and Grok Build
-use their own approval settings and may not ask. In every agent, get the
-user's go-ahead in words before a tool call that publishes.
+the user's own settings already allow it. Cursor, Gemini CLI, Grok Build and
+Qwen Code use their own approval settings and may not ask. In every agent, get
+the user's go-ahead in words before a tool call that publishes.
 
 ## The usual order
 
@@ -67,11 +67,14 @@ never connected. How to connect depends on the agent:
   or answer 401, tell the user to run `/mcp auth ihateposting`.
 - **Grok Build** signs in through the browser the first time a tool runs. To
   sign in again, the user opens `/mcps` and presses `i` on iHatePosting.
+- **Qwen Code** signs in through the browser too. If its tools are missing or
+  answer 401, the user opens `/mcp`, selects iHatePosting and chooses
+  **Authenticate** (or **Re-authenticate**).
 
-Never tell someone using this plugin in Claude, Cursor, Gemini CLI or Grok
-Build to create or paste an API key: there is nowhere to put one. If they
-added the server by hand with a key instead, the key-based guidance below
-applies.
+Never tell someone using this plugin in Claude, Cursor, Gemini CLI, Grok
+Build or Qwen Code to create or paste an API key: there is nowhere to put one.
+If they added the server by hand with a key instead, the key-based guidance
+below applies.
 
 Otherwise call `whoami`. What it returns is the user's iHatePosting login,
 not a social media handle. The handles from `list_accounts` belong to the

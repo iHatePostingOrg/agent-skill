@@ -5,6 +5,25 @@ Every release of this package, newest first. Versions follow
 one (`scripts/check.mjs` refuses a release where they differ). From 0.5.0
 on, each version tag gets a GitHub Release with the notes below.
 
+## 0.5.3 — 2026-09-28
+
+- **Qwen Code gets its own manifest, `qwen-extension.json`.** Without one,
+  Qwen Code installed this repository through `gemini-extension.json`, which
+  it checks before the Claude marketplace, and copied that file's server
+  entry unchanged. Qwen Code reads `url` as the older SSE transport and only
+  `httpUrl` as Streamable HTTP, so it would have tried SSE against a server
+  that speaks Streamable HTTP. Qwen Code reads its own manifest first, so the
+  new file decides: `httpUrl` set to the same sign-in address as every other
+  agent here, no key and no settings. Read from Qwen Code's source
+  (packages/core/src/extension/extension-converter.ts and
+  config/mcp-server-config.ts); not yet run in Qwen Code itself.
+- Install with `qwen extensions install iHatePostingOrg/agent-skill:ihateposting`,
+  then choose **Authenticate** on iHatePosting in `/mcp`. The server already
+  accepts Qwen Code's sign-in: its redirect address is on localhost, and the
+  resource it asks for is exactly the one the server's metadata names.
+- `scripts/check.mjs` checks the new manifest like the others: the name,
+  `httpUrl`, no `url`, `type`, headers or settings, and the shared version.
+
 ## 0.5.2 — 2026-09-28
 
 - **Claude's plugin directory clears the plugin.** 0.5.1 was still held under
