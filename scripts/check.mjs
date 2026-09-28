@@ -8,7 +8,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const MCP_URL = "https://ihateposting.com/mcp";
 /* The same server, reached the other way: this endpoint answers 401 with a
    WWW-Authenticate pointing at our protected-resource metadata, which is how
-   an OAuth client finds the sign-in. Used by Gemini CLI — see below. */
+   an OAuth client finds the sign-in. Used by Claude and Gemini CLI — see below. */
 const OAUTH_MCP_URL = "https://ihateposting.com/mcp/oauth";
 const problems = [];
 const fail = (msg) => problems.push(msg);
@@ -36,7 +36,6 @@ const EXPECTED = {
      reaches iHatePosting anonymously and its admin can only show a key prefix.
      The id is checked exactly, not just "has a query string": a copy-pasted
      file that still claims to be Cursor is the whole failure this guards. */
-  "mcp.claude.json": { auth: "Bearer ${user_config.api_key}", client: "claude-code" },
   "mcp.cursor.json": { auth: "Bearer ${IHATEPOSTING_API_KEY}", client: "cursor" },
   "mcp.grok.json": { auth: "Bearer ${IHATEPOSTING_API_KEY}", client: "grok" },
 };
@@ -50,6 +49,23 @@ const checkServer = (where, s, auth, client) => {
 for (const [file, { auth, client }] of Object.entries(EXPECTED)) {
   const j = readJson(file);
   if (j) checkServer(file, j.mcpServers?.ihateposting, auth, client);
+}
+/* Claude signs in with OAuth, like Gemini CLI below, and never with a key.
+   A key needs the plugin's userConfig, and only terminal Claude Code asks for
+   that: Cowork does not prompt for it and ignores a server whose option has
+   no default, claude.ai chat drops a server whose URL carries one
+   (claude.com/docs/plugins/platform-support), and the VS Code extension and
+   desktop app could not collect it either (anthropics/claude-code#89749).
+   The URL is exactly the one our listing in Claude's connector directory
+   publishes, so someone with the connector AND the plugin gets one set of
+   tools, not two — which is also why it carries no ?client=. */
+const claudeMcp = readJson("mcp.claude.json")?.mcpServers?.ihateposting;
+if (!claudeMcp) {
+  fail('mcp.claude.json: no "ihateposting" server');
+} else {
+  if (claudeMcp.url !== OAUTH_MCP_URL) fail(`mcp.claude.json: url is ${JSON.stringify(claudeMcp.url)}, expected ${OAUTH_MCP_URL}`);
+  if (claudeMcp.type !== "http") fail(`mcp.claude.json: type is ${JSON.stringify(claudeMcp.type)}, expected "http"`);
+  if (claudeMcp.headers) fail("mcp.claude.json: no headers — Claude signs in with OAuth, and a key header needs a userConfig that only terminal Claude Code asks for");
 }
 
 // 2. Each manifest points at its own MCP file, and the names agree.
@@ -68,10 +84,7 @@ for (const [file, mcp] of Object.entries(manifests)) {
   versions.add(j.version);
 }
 const claude = readJson(".claude-plugin/plugin.json");
-const k = claude?.userConfig?.api_key;
-if (claude && !(k?.sensitive === true && k?.required === true && k?.type === "string" && k?.title && k?.description)) {
-  fail(".claude-plugin/plugin.json: userConfig.api_key must be a sensitive, required string with a title and description");
-}
+if (claude?.userConfig) fail(".claude-plugin/plugin.json: no userConfig — Claude signs in with OAuth, so there is no key for anyone to paste");
 const cursor = readJson(".cursor-plugin/plugin.json");
 if (cursor && !(cursor.variables?.properties?.IHATEPOSTING_API_KEY && cursor.variables?.required?.includes("IHATEPOSTING_API_KEY"))) {
   fail(".cursor-plugin/plugin.json: variables must declare IHATEPOSTING_API_KEY as required");

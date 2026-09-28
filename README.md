@@ -2,10 +2,10 @@
 
 # iHatePosting for AI agents
 
-Let Claude Code, Cursor, Gemini CLI or Grok Build draft, check, schedule and
-publish posts on 14 social networks, using the accounts you have connected at
-[ihateposting.com](https://ihateposting.com). This package gives each agent
-the hosted iHatePosting MCP server (15 tools) and a skill that teaches it to
+Let Claude, Claude Code, Cursor, Gemini CLI or Grok Build draft, check,
+schedule and publish posts on 14 social networks, using the accounts you have
+connected at [ihateposting.com](https://ihateposting.com). This package gives
+each agent the hosted iHatePosting MCP server (15 tools) and a skill that teaches it to
 post safely.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -131,40 +131,48 @@ Reels, carousels, YouTube, Pinterest, TikTok and more. Every one is a draft.
 
 ## Install
 
-Get an API key first ([below](#get-an-api-key)), then pick your agent — except
-on Gemini CLI, which signs you in in the browser and needs no key.
+Claude and Gemini CLI sign you in in the browser and need no key. For Cursor
+and Grok Build, get an API key first ([below](#get-an-api-key)).
 
 | Agent | How it installs | Where the key goes |
 |-------|-----------------|--------------------|
-| Claude Code | `/plugin install` from this repository's marketplace | Asked for at install, stored as a secret |
+| Claude (claude.ai, desktop app, Cowork) | **Customize → Plugins**, adding this repository as a marketplace | No key — you sign in in the browser |
+| Claude Code | `/plugin install` from this repository's marketplace | No key — you sign in in the browser |
 | Cursor | Cursor Marketplace once listed, or `~/.cursor/mcp.json` | `IHATEPOSTING_API_KEY` |
 | Gemini CLI | `gemini extensions install` | No key — you sign in in the browser |
 | Grok Build | `grok plugin install ... --trust` | `IHATEPOSTING_API_KEY` in your environment |
-| ChatGPT, Claude on the web and others | Their own MCP settings | See the [setup guide](https://ihateposting.com/guides/post-to-social-media-from-an-ai-agent) |
+| ChatGPT and others | Their own MCP settings | See the [setup guide](https://ihateposting.com/guides/post-to-social-media-from-an-ai-agent) |
+
+<details>
+<summary><strong>Claude (claude.ai, the desktop app, Cowork)</strong></summary>
+
+In **Customize → Plugins**, choose **Add → Add marketplace**, enter
+`https://github.com/iHatePostingOrg/agent-skill` and install **iHatePosting**.
+Then open the plugin's **Connectors** tab and connect iHatePosting: you sign
+in to your iHatePosting account and press **Allow**. There is no key to paste.
+
+Already added the iHatePosting connector from Claude's directory? The plugin
+uses the same address, so you get one set of tools, not two.
+
+</details>
 
 <details>
 <summary><strong>Claude Code</strong></summary>
-
-Inside **terminal** Claude Code:
 
 ```
 /plugin marketplace add iHatePostingOrg/agent-skill
 /plugin install ihateposting@ihateposting
 ```
 
-The install asks for your API key and stores it as a secret. Three things to
-know:
+Then run `/mcp`, pick the iHatePosting server and choose **Authenticate**. A
+browser window opens: sign in to your iHatePosting account and press
+**Allow**. There is no key to paste.
 
-- **Install from terminal Claude Code.** `claude plugin install` from a plain
-  shell does not ask for the key; add `--config api_key=<your key>` there, and
-  note that this leaves the key in your shell history. The VS Code extension
-  and the desktop app currently cannot collect the key at all
-  ([anthropics/claude-code#89749](https://github.com/anthropics/claude-code/issues/89749)),
-  and without it the server does not start.
-- **Already added iHatePosting by hand?** Run `claude mcp remove ihateposting`
-  first. Claude Code matches plugin servers by address, so an existing manual
-  entry for the same URL wins and the plugin's copy is skipped.
-- **Changing the key:** `/plugin configure ihateposting@ihateposting`.
+- **Already added iHatePosting by hand?** Remove that entry with
+  `claude mcp remove ihateposting`, or every tool shows up twice.
+- **Coming from 0.3.x?** Earlier versions asked for an API key. After the
+  update, authenticate once from `/mcp` as above; the plugin no longer sends
+  the key.
 
 </details>
 
@@ -244,9 +252,8 @@ A plugin's MCP server stays off until the plugin is trusted, which is what
 <details>
 <summary><strong>Other agents</strong></summary>
 
-ChatGPT, Claude on the web and desktop, VS Code with GitHub Copilot, Codex,
-Windsurf, Zed, Cline, OpenClaw and more connect to the same server without
-this package. The setup for each is at
+ChatGPT, VS Code with GitHub Copilot, Codex, Windsurf, Zed, Cline, OpenClaw
+and more connect to the same server without this package. The setup for each is at
 [ihateposting.com/guides/post-to-social-media-from-an-ai-agent](https://ihateposting.com/guides/post-to-social-media-from-an-ai-agent).
 
 OpenClaw's documentation says it reads a package with a `.cursor-plugin/`
@@ -450,10 +457,12 @@ Plans and prices: [ihateposting.com/pricing](https://ihateposting.com/pricing).
 
 ## Troubleshooting
 
-- **The tools are missing, or say "No API key".** The client sent no key. In
-  Claude Code, run `/plugin configure ihateposting@ihateposting` in terminal
-  Claude Code. In Cursor and Grok Build, set `IHATEPOSTING_API_KEY`. Gemini
-  CLI uses no key — run `/mcp auth ihateposting` to sign in again.
+- **The tools are missing.** The agent is not signed in. On claude.ai and in
+  Cowork, connect iHatePosting from the plugin's **Connectors** tab; in Claude
+  Code, run `/mcp` and choose **Authenticate**; in Gemini CLI, run
+  `/mcp auth ihateposting`. None of these use a key.
+- **The tools say "No API key".** The client sent no key. In Cursor and Grok
+  Build, set `IHATEPOSTING_API_KEY`.
 - **"iHatePosting API 401".** The key is wrong, has been replaced by a newer
   one, or the client sent an unfilled placeholder instead of the key. Check
   the client's setting before assuming the key was revoked.
@@ -490,14 +499,16 @@ Plans and prices: [ihateposting.com/pricing](https://ihateposting.com/pricing).
 ## Network endpoints and credentials
 
 - This package calls one server, by one of two paths: `https://ihateposting.com/mcp`
-  for the agents that send an API key, and `https://ihateposting.com/mcp/oauth`
-  for Gemini CLI, which signs in instead. Both are MCP over Streamable HTTP.
-- The key path sends `Authorization: Bearer <key>`. Claude Code stores the key
-  as a secret; Cursor keeps it as a plugin setting; Grok Build reads it from
-  the `IHATEPOSTING_API_KEY` environment variable.
-- The OAuth path sends no key at all. Gemini CLI discovers the sign-in from
-  the server's own metadata, uses PKCE, registers itself, and keeps the token
-  in `~/.gemini/mcp-oauth-tokens.json`. The token can be revoked at
+  for the agents that send an API key (Cursor, Grok Build), and
+  `https://ihateposting.com/mcp/oauth` for Claude and Gemini CLI, which sign
+  in instead. Both are MCP over Streamable HTTP.
+- The key path sends `Authorization: Bearer <key>`. Cursor keeps the key as a
+  plugin setting; Grok Build reads it from the `IHATEPOSTING_API_KEY`
+  environment variable.
+- The OAuth path sends no key at all. Claude and Gemini CLI discover the
+  sign-in from the server's own metadata, use PKCE and register themselves.
+  Each keeps its own token; Gemini CLI keeps it in
+  `~/.gemini/mcp-oauth-tokens.json`. The token can be revoked at
   ihateposting.com under Settings → Developers.
 - There are no hooks and no install scripts, and nothing runs on your machine.
 
@@ -505,7 +516,7 @@ Plans and prices: [ihateposting.com/pricing](https://ihateposting.com/pricing).
 
 | Path | For |
 |------|-----|
-| `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `mcp.claude.json` | Claude Code |
+| `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `mcp.claude.json` | Claude (claude.ai, Cowork, Claude Code) |
 | `.cursor-plugin/plugin.json`, `mcp.cursor.json`, `assets/logo.png` | Cursor |
 | `gemini-extension.json` | Gemini CLI |
 | `.grok-plugin/plugin.json`, `mcp.grok.json` | Grok Build |
@@ -517,9 +528,9 @@ Plans and prices: [ihateposting.com/pricing](https://ihateposting.com/pricing).
 | `scripts/check.mjs`, `.github/workflows/check.yml` | The release check, run on every push |
 | `CHANGELOG.md` | What changed in each release |
 
-Each agent has its own MCP file because each fills in the key differently:
-Claude Code from the plugin's settings (`${user_config.api_key}`), and the
-others from `IHATEPOSTING_API_KEY`. There is deliberately no `.mcp.json` at the
+Each agent has its own MCP file because each connects differently: Claude and
+Gemini CLI sign in with OAuth at `/mcp/oauth`, and Cursor and Grok Build send
+`IHATEPOSTING_API_KEY` to `/mcp`. There is deliberately no `.mcp.json` at the
 root. Directories that read one would install a server with an unfilled
 placeholder in place of a key.
 

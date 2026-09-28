@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.4.0
+
+- **Claude signs in instead of asking for a key.** The plugin's server is now
+  `https://ihateposting.com/mcp/oauth`, the address iHatePosting's listing in
+  Claude's connector directory already uses, and the `api_key` setting is
+  gone. A key only ever worked in terminal Claude Code: Cowork does not ask
+  for a plugin's settings, and the VS Code extension and the desktop app could
+  not collect the key
+  ([anthropics/claude-code#89749](https://github.com/anthropics/claude-code/issues/89749)).
+  Signing in works on claude.ai, in Cowork and in Claude Code alike, and
+  someone who has both the directory connector and the plugin gets one set of
+  tools, not two. Claude Code users coming from 0.3.x authenticate once from
+  `/mcp`.
+- **Every manifest says 0.4.0.** 0.3.4 was released with its manifests still
+  at 0.3.3, so an install that goes by the version kept the old copy.
+- **The skill no longer calls the CLI a fallback for text-only posts.** It
+  has uploaded media since `ihateposting upload` arrived (0.3.4).
+
 ## 0.3.4
 
 - **`--check` was documented in the form that answers the wrong question.** The

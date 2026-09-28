@@ -2,10 +2,7 @@
   "mcpServers": {
     "ihateposting": {
       "type": "http",
-      "url": "https://ihateposting.com/mcp?client=claude-code",
-      "headers": {
-        "Authorization": "Bearer ${user_config.api_key}"
-      }
+      "url": "https://ihateposting.com/mcp/oauth"
     }
   }
 }
