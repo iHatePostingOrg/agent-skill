@@ -5,6 +5,20 @@ Every release of this package, newest first. Versions follow
 one (`scripts/check.mjs` refuses a release where they differ). From 0.5.0
 on, each version tag gets a GitHub Release with the notes below.
 
+## 0.5.5 — 2026-09-29
+
+- **The README's logo loads from ihateposting.com, with the address under
+  it.** Its first line was `assets/logo.svg` as a plain Markdown image, and
+  Claude's plugin directory does not load such an image until you ask, so
+  the plugin's Contents tab opened on an empty "Show Image" box above the
+  heading. The logo is now the site's own icon
+  (https://ihateposting.com/apple-icon.png, the square mark, 180 px), linked
+  to the site, which is how the README's badges were already written:
+  Claude's viewer shows a linked image as its link text, and GitHub shows
+  the image. Under it, the website address. The viewer shows HTML as raw
+  text, so neither line uses any. Cursor and Grok Build still show the logo
+  from `assets/logo.svg`, which their manifests name.
+
 ## 0.5.4 — 2026-09-29
 
 - **Every listing names the 14 networks.** The description each directory

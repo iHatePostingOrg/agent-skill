@@ -1,4 +1,6 @@
-![iHatePosting logo](assets/logo.svg)
+[![iHatePosting](https://ihateposting.com/apple-icon.png)](https://ihateposting.com)
+
+**[ihateposting.com](https://ihateposting.com)**
 
 # iHatePosting for AI agents
 
