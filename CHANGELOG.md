@@ -5,6 +5,15 @@ Every release of this package, newest first. Versions follow
 one (`scripts/check.mjs` refuses a release where they differ). From 0.5.0
 on, each version tag gets a GitHub Release with the notes below.
 
+## 0.5.6 — 2026-09-29
+
+- **The README describes the MCP Registry entry as it now is.** The official
+  MCP Registry lists `com.ihateposting/mcp` 0.9.1-1 (published 2026-09-29)
+  with both addresses, `https://ihateposting.com/mcp/oauth` for signing in
+  first and `https://ihateposting.com/api/mcp` for a key, plus the npm
+  server `ihateposting-mcp`. The README still said the entry pointed only
+  at `/api/mcp`.
+
 ## 0.5.5 — 2026-09-29
 
 - **The README's logo loads from ihateposting.com, with the address under

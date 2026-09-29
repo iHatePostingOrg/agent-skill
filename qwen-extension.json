@@ -1,7 +1,7 @@
 {
   "name": "ihateposting",
   "displayName": "iHatePosting",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "description": "Schedule and publish to 14 social networks from Qwen Code (X, LinkedIn, Instagram, Facebook, TikTok, YouTube, Threads, Bluesky, Pinterest, Mastodon, Telegram, Discord, Tumblr and Slack): check a draft against each network's limits, then post now, schedule it, or keep it as a draft.",
   "mcpServers": {
     "ihateposting": {

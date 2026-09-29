@@ -544,8 +544,10 @@ whenever the client allows one, and make a new key if a URL containing it is
 ever shared.
 
 **MCP Registry.** The server is listed in the official MCP Registry as
-`com.ihateposting/mcp`. That entry points at `https://ihateposting.com/api/mcp`,
-which is the same server as `/mcp`.
+`com.ihateposting/mcp`, with both addresses: `https://ihateposting.com/mcp/oauth`,
+where a client signs in, and `https://ihateposting.com/api/mcp` (the same
+server as `/mcp`), which takes a key as `Authorization: Bearer`. The entry
+also names the local npm server, `ihateposting-mcp`.
 
 ## REST API and webhooks
 
