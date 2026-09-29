@@ -1,7 +1,7 @@
 {
   "name": "ihateposting",
-  "version": "0.5.3",
-  "description": "Schedule and publish to 14 social networks from Grok Build through the hosted iHatePosting MCP server. You sign in with your iHatePosting account the first time a tool runs; there is no key to set.",
+  "version": "0.5.4",
+  "description": "Schedule and publish to 14 social networks from Grok Build: X, LinkedIn, Instagram, Facebook, TikTok, YouTube, Threads, Bluesky, Pinterest, Mastodon, Telegram, Discord, Tumblr and Slack, through the hosted iHatePosting MCP server. You sign in with your iHatePosting account from /mcps (select it and press i); there is no key to set.",
   "author": {
     "name": "iHatePosting",
     "email": "support@ihateposting.com",

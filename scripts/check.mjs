@@ -173,6 +173,35 @@ if (qwen) {
   if (qwen.settings) fail("qwen-extension.json: no settings — signing in with OAuth means there is no key for anyone to paste");
   versions.add(qwen.version);
 }
+/* KIMI CODE reads .kimi-plugin/plugin.json (or kimi.plugin.json, which would
+   win if both existed) — MoonshotAI/kimi-code@2.1.1,
+   packages/agent-core-v2/src/app/plugin/manifest.ts:16-17, 38-57. Unlike the
+   Claude, Cursor and Grok manifests, its mcpServers must be an inline object:
+   a path string is rejected ("mcpServers" must be an object, manifest.ts:334-343).
+   A url entry is Streamable HTTP (mcpCore/config-schema.ts:59-66); `transport`
+   is spelled out so this check can hold it. With no headers, a 401 from our
+   server marks the server as needing sign-in and exposes an authenticate tool
+   (mcpCore/connection-manager.ts:485-491; agent/mcp/tools/auth.ts). The
+   runtime server name is plugin-ihateposting:ihateposting (plugin/manager.ts:689-691),
+   so its tools are mcp__plugin-ihateposting_ihateposting__<tool>
+   (mcpCore/tool-naming.ts:6-17) — skillInstructions tells the model so.
+   /plugins install <github url> takes the LATEST RELEASE
+   (plugin/github-resolver.ts:62-69, 96-125), so this reaches users only
+   once a release carries it. */
+const kimi = readJson(".kimi-plugin/plugin.json");
+if (kimi) {
+  if (kimi.name !== "ihateposting") fail(".kimi-plugin/plugin.json: name must be ihateposting");
+  if (kimi.skills !== "./skills/") fail('.kimi-plugin/plugin.json: skills must be "./skills/"');
+  const k = kimi.mcpServers?.ihateposting;
+  if (!k || typeof kimi.mcpServers !== "object") {
+    fail('.kimi-plugin/plugin.json: mcpServers must be an inline object with an "ihateposting" server');
+  } else {
+    if (k.url !== OAUTH_MCP_URL) fail(`.kimi-plugin/plugin.json: url is ${JSON.stringify(k.url)}, expected ${OAUTH_MCP_URL}`);
+    if (k.transport !== "http") fail(`.kimi-plugin/plugin.json: transport is ${JSON.stringify(k.transport)}, expected "http" — "sse" is a transport our server does not serve`);
+    if (k.headers || k.bearerTokenEnvVar) fail(".kimi-plugin/plugin.json: no headers or bearerTokenEnvVar — Kimi Code signs in with OAuth, and either one turns the sign-in off");
+  }
+  versions.add(kimi.version);
+}
 /* THE ONE-CLICK INSTALL LINK, which is a config too — just base64'd inside a
    URL, so nothing above sees it and no human diff reads it.
    It was missed exactly that way on 2026-09-25: every visible JSON block got
@@ -268,6 +297,31 @@ if (existsSync(join(ROOT, "examples"))) {
 // 6. No real key anywhere.
 for (const p of walk(ROOT)) {
   if (/pk_live_[0-9a-zA-Z]{6,}/.test(readFileSync(p, "utf8"))) fail(`${relative(ROOT, p)}: contains what looks like a real API key`);
+}
+
+// 7. The ClawHub copy (clawhub/ihateposting): the same references as the
+// plugin's skill, and none of the plugin-only fields. OpenClaw and Hermes
+// Agent take the skill from ClawHub, where every skill is published under
+// MIT-0 (ClawHub docs/skill-format.md, "License"), so the copy carries no
+// licence line; and they add the server by hand, so it carries no Claude
+// Code tool list. ClawHub's scanner and Hermes Agent's install guard read
+// the same files, so the rules for the plugin's skill apply to it too.
+const CH = "clawhub/ihateposting";
+if (existsSync(join(ROOT, CH))) {
+  const chSkill = readFileSync(join(ROOT, CH, "SKILL.md"), "utf8");
+  const chFm = chSkill.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
+  if (!/^name:\s*ihateposting\s*$/m.test(chFm)) fail(`${CH}/SKILL.md: name must be ihateposting`);
+  if (/^(license|allowed-tools):/m.test(chFm)) fail(`${CH}/SKILL.md: no license (ClawHub applies MIT-0) and no allowed-tools (Claude Code names)`);
+  for (const f of walk(join(ROOT, CH)).filter((p) => p.endsWith(".md"))) {
+    const t = readFileSync(f, "utf8");
+    if (t.includes("$")) fail(`${relative(ROOT, f)}: contains a dollar sign`);
+    if (/\bpass/i.test(t)) fail(`${relative(ROOT, f)}: contains "pass"`);
+    if (t.includes(KEY_REF)) fail(`${relative(ROOT, f)}: contains ${KEY_REF}`);
+    for (const m of t.matchAll(toolShaped)) if (!TOOLS.includes(m[1])) fail(`${relative(ROOT, f)}: names \`${m[1]}\`, which is not an iHatePosting tool`);
+  }
+  const a = readFileSync(join(ROOT, "skills/ihateposting/references/platform-options.md"));
+  const b = readFileSync(join(ROOT, CH, "references/platform-options.md"));
+  if (!a.equals(b)) fail(`${CH}/references/platform-options.md: differs from the plugin's copy`);
 }
 
 if (problems.length) {

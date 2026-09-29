@@ -5,6 +5,49 @@ Every release of this package, newest first. Versions follow
 one (`scripts/check.mjs` refuses a release where they differ). From 0.5.0
 on, each version tag gets a GitHub Release with the notes below.
 
+## 0.5.4 — 2026-09-29
+
+- **Every listing names the 14 networks.** The description each directory
+  shows (Claude's plugin directory, Cursor, Grok Build, Gemini CLI, Qwen Code
+  and Kimi Code) said "14 social networks" without saying which; it now names
+  X, LinkedIn, Instagram, Facebook, TikTok, YouTube, Threads, Bluesky,
+  Pinterest, Mastodon, Telegram, Discord, Tumblr and Slack.
+- **Where each agent signs in, corrected.** Gemini CLI opens the browser when
+  it starts and connects to the server, not when a tool first runs (it starts
+  the sign-in on the server's 401 when `oauth.enabled` is set). Grok Build
+  signs in from `/mcps`: select ihateposting and press `i`; its tools stay
+  hidden until then. Cursor's MCP servers now live under **Customize**, then
+  **MCPs**. The README, the skill and the Grok Build manifests say so.
+- `whoami` in the README names the login a connection acts for, signed in or
+  with a key, instead of "the login the key belongs to".
+- The README says Claude plugins need a paid Claude plan (Pro, Max, Team or
+  Enterprise), and points the Free plan at Claude's connector directory.
+- **Kimi Code gets a manifest, `.kimi-plugin/plugin.json`.** Kimi Code
+  (Moonshot AI) installs a plugin from a GitHub repository's latest release
+  with `/plugins install`. Its manifest names the server inline, at the same
+  sign-in address as every other agent here, with `transport` set to `http`
+  and no key. When the server asks for a sign-in, Kimi Code offers an
+  `authenticate` step that opens the browser. Read from Kimi Code's source at
+  release 2.1.1 (app/plugin/manifest.ts, mcpCore/config-schema.ts,
+  mcpCore/connection-manager.ts); not yet run in Kimi Code itself.
+  `scripts/check.mjs` checks the new manifest like the others.
+- **A copy of the skill for ClawHub, in `clawhub/ihateposting/`.** OpenClaw
+  and Hermes Agent install skills from ClawHub and add the MCP server by hand,
+  so this copy drops the plugin's sign-in steps, its Claude Code tool list and
+  its licence line (ClawHub publishes every skill under MIT-0), and explains
+  the tool-name prefixes those agents use. Its `references/platform-options.md`
+  is the plugin's file, and `scripts/check.mjs` fails if the two drift. Not
+  yet published to ClawHub.
+- **Cursor, ready for its Marketplace.** The manifest's homepage is now the
+  Cursor page at ihateposting.com, which leads with the sign-in, and it names
+  its category (`integrations`, as most listed integrations do). The README's
+  Cursor section says how to install from the Marketplace, and adds three
+  things Cursor's documentation says about a local copy: a symlink pointing
+  elsewhere is skipped, on Teams and Enterprise an admin controls it with
+  **Allow Local Plugin Imports** (off by default on Enterprise), and a
+  Marketplace install takes the local copy's place. The
+  manifest validates against Cursor's own schema (cursor/plugins).
+
 ## 0.5.3 — 2026-09-28
 
 - **Qwen Code gets its own manifest, `qwen-extension.json`.** Without one,

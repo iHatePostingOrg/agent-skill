@@ -1,13 +1,13 @@
 {
   "name": "ihateposting",
   "displayName": "iHatePosting",
-  "version": "0.5.3",
-  "description": "Draft, check and schedule posts to 14 social networks from Cursor. You sign in with your iHatePosting account, and every post is a draft until you say otherwise.",
+  "version": "0.5.4",
+  "description": "Draft, check and schedule posts to 14 social networks from Cursor: X, LinkedIn, Instagram, Facebook, TikTok, YouTube, Threads, Bluesky, Pinterest, Mastodon, Telegram, Discord, Tumblr and Slack. You sign in with your iHatePosting account, and every post is a draft until you say otherwise.",
   "author": {
     "name": "iHatePosting",
     "email": "support@ihateposting.com"
   },
-  "homepage": "https://ihateposting.com/guides/post-to-social-media-from-an-ai-agent",
+  "homepage": "https://ihateposting.com/ai-agents/cursor",
   "repository": "https://github.com/iHatePostingOrg/agent-skill",
   "license": "MIT",
   "logo": "assets/logo.svg",
@@ -33,5 +33,6 @@
     "tiktok",
     "youtube"
   ],
-  "mcpServers": "./mcp.cursor.json"
+  "mcpServers": "./mcp.cursor.json",
+  "category": "integrations"
 }
