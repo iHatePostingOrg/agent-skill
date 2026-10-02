@@ -5,6 +5,18 @@ Every release of this package, newest first. Versions follow
 one (`scripts/check.mjs` refuses a release where they differ). From 0.5.0
 on, each version tag gets a GitHub Release with the notes below.
 
+## 0.5.7 — 2026-10-02
+
+- **The local npm server needs Node.js 20 or later.** `ihateposting-mcp`
+  0.10.0 moved to the MCP SDK v2 (`@modelcontextprotocol/server` 2.2.0),
+  which requires Node.js 20, and the README now says so above the `npx`
+  config. The hosted server, which every manifest in this package connects
+  to, asks nothing new of you; it now also speaks the 2026-07-28 MCP
+  protocol, so Claude and ChatGPT no longer fall back to the older one.
+- **The MCP Registry lists `com.ihateposting/mcp` 0.10.0** (published
+  2026-10-02), with the same two addresses as before and the npm server at
+  0.10.0.
+
 ## 0.5.6 — 2026-09-29
 
 - **The README describes the MCP Registry entry as it now is.** The official

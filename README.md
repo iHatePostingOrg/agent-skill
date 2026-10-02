@@ -489,7 +489,8 @@ measure at all, so a missing number is not mistaken for no reach.
 ## Other ways to connect
 
 **Local MCP server (npm).** For clients that start a local process, the same
-16 tools run from [`ihateposting-mcp`](https://www.npmjs.com/package/ihateposting-mcp):
+16 tools run from [`ihateposting-mcp`](https://www.npmjs.com/package/ihateposting-mcp),
+which needs Node.js 20 or later (since 0.10.0):
 
 ```json
 {
