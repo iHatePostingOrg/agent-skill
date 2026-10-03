@@ -1,6 +1,6 @@
 # Per-network options
 
-Load this when a post needs more than text: a title, a board, a privacy level, a thread, a first comment, a cover image or a Reel. `get_platform_rules` lists only the options a network cannot publish without. This file lists the keys the publisher reads that a post is likely to need, with their values and defaults.
+Load this when a post needs more than text: a title, a board, a privacy level, a thread, a first comment, a cover image or a Reel. `get_platform_rules` lists every option each network takes, with its type, allowed values and default. This file adds what each one does and the traps around it.
 
 ## How options are sent
 
@@ -8,15 +8,15 @@ Load this when a post needs more than text: a title, a board, a privacy level, a
 |---|---|
 | `create_post` | `options: { "<network>": { key: value } }`, plus `overrides: { "<network>": "different text" }` |
 | `update_post` | The same `options` and `overrides` shape, but the post itself takes `baseContent`, `accountIds` (not platform names) and a required `action`. It replaces the whole post, so read the post with `get_post` first and send every option back. |
-| `validate_post` | Inside each target: `targets: [{ "platform": "youtube", "contentOverride": "…", "options": { … } }]` |
+| `validate_post` | The same `options` and `overrides` shape as `create_post`, or inside each target: `targets: [{ "platform": "youtube", "contentOverride": "…", "options": { … } }]`. A target's own value wins. |
 
 Rules that apply to every network:
 
 - **Options belong to a network, not an account.** Every account of that network in the post gets the same options. To give two Pinterest accounts different boards, create two posts.
-- **Keys are not checked when you send them.** A misspelled key is saved and then ignored. Copy the spellings below exactly.
+- **Keys and values are checked when you send them**, on every call and for drafts too. A key the network does not read is refused with a 400 that suggests the right one (`madeForKids` gets "did you mean ytMadeForKids?", `privacy` gets `ytPrivacy`). So is a value outside the lists below, or of the wrong kind: a true/false option takes JSON `true` or `false`, not the text `"true"`. Every problem is named at once. Options already saved on a post, as `get_post` shows them, are accepted back by `update_post` as they are.
 - **Some fields fill themselves.** When you leave them unset, `create_post` and `update_post` fill YouTube `ytTitle` (first line of the text, without links, hashtags or @handles) and `ytTags` (its hashtags), Pinterest `title` (first line) and `link` (first URL), and Tumblr `tumblrTags` (hashtags). A value you send always wins, including an empty string `""`.
-- **`validate_post` does not fill those fields.** Send `ytTitle` yourself when validating a YouTube post, or it reports a missing title that `create_post` would have filled.
-- **When the checks run.** With action `schedule` or `now`, `create_post` and `update_post` run each network's checks and refuse the post with the first blocking problem. Drafts skip these checks, but the X link rule below applies to drafts too. `reschedule_post` does not run them when it turns a draft into a scheduled post. The publisher checks again just before sending and skips a send that fails.
+- **`validate_post` fills them the same way**, so what it reports is what `create_post` would do.
+- **When the checks run.** Key and value checks run on every call. With action `schedule` or `now`, `create_post` and `update_post` also run each network's own checks (media, length and the traps below) and refuse the post with the first blocking problem. Drafts skip those network checks, but the X link rule below applies to drafts too. `reschedule_post` refuses a draft: schedule one with `update_post`, which runs the checks. The publisher checks again just before sending and skips a send that fails.
 - **Check what was saved.** `get_post` returns each network's stored options, including the filled-in ones, and a `notice` when a send worked but part of it did not (for example, a refused YouTube thumbnail).
 
 Example (a draft; nothing is published):
@@ -52,13 +52,13 @@ Alt text is not an option: set it on the media with `upload_media` (`altText`). 
 | Key | Values | Default | Notes |
 |---|---|---|---|
 | `threadSegments` | array of strings | none | See the shared table. Each part has X's 280 weighted-character limit. |
-| `xReplySettings` | `following`, `mentioned`, `subscribers`, `verified` | everyone | Any other value means everyone. Applies to the first post of a thread. |
+| `xReplySettings` | `everyone`, `following`, `mentioned`, `subscribers`, `verified` | `everyone` | Any other value is refused. Applies to the first post of a thread. |
 | `xCommunity` | community URL or numeric id | none | The account must be a member of the community. |
 | `xMadeWithAi` | `true` | off | Labels the post as made with AI. |
 | `xPaidPartnership` | `true` | off | Labels the post as a paid partnership. |
-| `xPostType` | `"article"` | normal post | Posts an X Article. The post text becomes the article body, and media is not attached. X accepts Articles only from Premium accounts. |
+| `xPostType` | `post`, `article` | `post` | Posts an X Article. The post text becomes the article body, and media is not attached. X accepts Articles only from Premium accounts. |
 | `xArticleTitle` | string | none | Required when `xPostType` is `"article"`. |
-| `xArticleStatus` | `"publish"` | saved as an X draft | Without `"publish"`, the article stays in the account's X drafts and the send still shows as published, with no link. |
+| `xArticleStatus` | `draft`, `publish` | `draft`: saved as an X draft | Without `"publish"`, the article stays in the account's X drafts and the send still shows as published, with no link. |
 | `autoPlug`, `plugText`, `plugThreshold`, `autoRepost` | `true`, string, number, `true` | threshold 50 | Pro plan only; on any other plan these keys are removed without an error. For 24 hours after publishing, once the post reaches `plugThreshold` likes, `autoPlug` replies with `plugText` and `autoRepost` reposts it (at least 6 hours after publishing). |
 
 Traps:
@@ -71,8 +71,8 @@ Traps:
 |---|---|---|---|
 | `threadSegments` | array of strings | none | 300 characters per part. |
 | `linkCard` | `false` | card on | Without media, a card is built from the first URL in the first part. |
-| `lang` | one language code, e.g. `en`, `pt-BR` | none | An invalid code is ignored. Applies to every part. |
-| `label` | `suggestive`, `nudity`, `graphic` | none | Content warning. Any other value adds no label. Applies to every part. |
+| `lang` | one language code, e.g. `en`, `pt-BR` | none | Anything that is not a language code is refused. Applies to every part. |
+| `label` | `none`, `suggestive`, `nudity`, `graphic` | `none` | Content warning. Any other value is refused. Applies to every part. |
 
 Traps: up to 4 images or one video, not both.
 
@@ -82,7 +82,7 @@ Traps: up to 4 images or one video, not both.
 |---|---|---|---|
 | `threadSegments` | array of strings | none | 500 characters per part. |
 | `firstComment` | string | none | Posted under the last part of a thread. |
-| `threadsReplyControl` | `everyone`, `following`, `mentioned`, `followers`, `author` | everyone | Meta's own names (`accounts_you_follow`, `mentioned_only`, `followers_only`, `parent_post_author_only`) also work. Set on the first post only. |
+| `threadsReplyControl` | `everyone`, `following`, `mentioned`, `followers`, `author` | everyone | Meta's own names (`accounts_you_follow`, `mentioned_only`, `followers_only`, `parent_post_author_only`) also work. Any other value is refused. Set on the first post only. |
 
 Traps:
 - Thread parts, first comments and a reply limit all need Threads' reply permission. On a Threads account connected before 4 September 2026, a thread or a reply limit can fail with a message asking for a reconnect, and a first comment is skipped. Reconnecting fixes both.
@@ -93,7 +93,7 @@ Traps:
 | Key | Values | Default | Notes |
 |---|---|---|---|
 | `threadSegments` | array of strings | none | 500 characters per part. |
-| `mastodonVisibility` | `public`, `unlisted`, `private` | `public` | `direct` is not accepted and posts as `public`. |
+| `mastodonVisibility` | `public`, `unlisted`, `private` | `public` | `direct`, and any other value, is refused. |
 | `coverAssetId` | image media id | none | Video thumbnail. |
 
 ## Telegram
@@ -131,9 +131,9 @@ No options. Up to 5 images per message.
 
 | Key | Values | Default | Notes |
 |---|---|---|---|
-| `fbType` | `reel`, `story` | feed post | `reel` applies to a video. `story` needs exactly one photo or video, and no caption is sent. |
-| `fbLink` | URL | none | Adds a link preview. Text-only posts only; ignored when media is attached. |
-| `fbBackground` | a Facebook background preset id (numeric string) | none | Text-only posts with no `fbLink`. An id the app does not know is ignored, and no tool lists them, so use one only if the user supplies it. |
+| `fbType` | `feed`, `reel`, `story` | `feed` | `reel` applies to a video. `story` needs exactly one photo or video, and no caption is sent (a story with text gets a warning). |
+| `fbLink` | URL | none | Adds a link preview. Text-only posts only: with media attached, a scheduled or publish-now post is refused. |
+| `fbBackground` | a Facebook background preset id (numeric string) | none | Text-only posts with no `fbLink`. An id the app does not know is refused. No tool lists them, so use one only if the user supplies it. |
 | `coverAssetId` | image media id | none | Video thumbnail. |
 
 Traps: up to 10 photos or one video, not both. Story photos are capped at 10 MB.
@@ -142,7 +142,7 @@ Traps: up to 10 photos or one video, not both. Story photos are capped at 10 MB.
 
 | Key | Values | Default | Notes |
 |---|---|---|---|
-| `igType` | `feed`, `reel`, `story` | `feed` | `feed`: one image is a photo post, one video is a Reel that also shows on the profile grid, 2 to 10 items make a carousel. `reel`: a single video stays off the grid, in the Reels tab only. `story`: exactly one image or video, no caption. |
+| `igType` | `feed`, `reel`, `story` | `feed` | `feed`: one image is a photo post, one video is a Reel that also shows on the profile grid, 2 to 10 items make a carousel. `reel`: a single video stays off the grid, in the Reels tab only. `story`: exactly one image or video, no caption. Any other value is refused. |
 | `firstComment` | string | none | Not posted on stories. |
 | `igUserTags` | array of usernames, or one comma-separated string | none | Up to 20. Instagram lets only business and creator accounts be tagged. When you schedule or publish, a handle Instagram says it cannot tag gets the post refused, with the handle named. The same tags go on every carousel item. Ignored on stories. |
 | `igCollaborators` | array of usernames, or one comma-separated string | none | Up to 3. Refused on stories. |
@@ -177,13 +177,13 @@ Traps: media is required, one image or one video per pin; when both are attached
 
 | Key | Values | Default | Notes |
 |---|---|---|---|
-| `tiktokPrivacy` | `public`, `followers`, `friends`, `private` (also `everyone`, `mutual`, `self`), or TikTok's `PUBLIC_TO_EVERYONE`, `FOLLOWER_OF_CREATOR`, `MUTUAL_FOLLOW_FRIENDS`, `SELF_ONLY` | **the widest audience TikTok allows the account** | Unset means public for a public account and followers for a private one. An unrecognised word means only the creator can see it. Ask the user rather than leaving it unset. |
+| `tiktokPrivacy` | `public`, `followers`, `friends`, `private` (also `everyone`, `mutual`, `self`), or TikTok's `PUBLIC_TO_EVERYONE`, `FOLLOWER_OF_CREATOR`, `MUTUAL_FOLLOW_FRIENDS`, `SELF_ONLY` | **the widest audience TikTok allows the account** | Any letter case; any other word is refused. Unset means public for a public account and followers for a private one. Ask the user rather than leaving it unset. |
 | `tiktokAllowComment` | `true` | off | |
 | `tiktokAllowDuet` | `true` | off | Videos only. |
 | `tiktokAllowStitch` | `true` | off | Videos only. |
 | `tiktokAiGenerated` | `true` | off | Labels AI-generated content. Videos only. |
 | `tiktokYourBrand` | `true` | off | Discloses promotion of the creator's own business. |
-| `tiktokCommercial` | `true` | off | Discloses branded content. TikTok refuses branded content set to private. |
+| `tiktokCommercial` | `true` | off | Discloses branded content. Branded content set to private is refused when you schedule or publish, unless `tiktokSendAsDraft` is on. |
 | `tiktokAutoAddMusic` | `true` | off | Photo posts only. |
 | `tiktokSendAsDraft` | `true` | off | Sends the post to the creator's TikTok inbox to finish in the app. **Nothing is published**, but the send still shows as sent, with no link. |
 | `coverOffsetMs` | number (milliseconds) | TikTok's choice | Video frame to use as the cover. |
@@ -194,11 +194,11 @@ Traps: media is required: one video, or photos (TikTok takes up to 35, but a pos
 
 | Key | Values | Default | Notes |
 |---|---|---|---|
-| `ytTitle` | string, up to 100 characters | first line of the text | **Required.** The key is `ytTitle`; `title` is ignored for YouTube. |
+| `ytTitle` | string, up to 100 characters | first line of the text | **Required.** The key is `ytTitle`; `title` is refused for YouTube, with a pointer to `ytTitle`. |
 | `ytMadeForKids` | `true` / `false`, or `"yes"` / `"no"` | none | **Required**, and never filled automatically. Ask the user. |
-| `ytPrivacy` | `public`, `unlisted`, `private` | `public` | The key is `ytPrivacy`; `privacy` is ignored. |
+| `ytPrivacy` | `public`, `unlisted`, `private` | `public` | Lower case. The key is `ytPrivacy`; `privacy` is refused, with a pointer to `ytPrivacy`. |
 | `ytTags` | array, or one comma-separated string | the text's hashtags (up to 15) | A leading `#` is removed. Up to 30 tags, trimmed to fit YouTube's 500-character total. |
-| `ytCategory` | `people-blogs`, `science-tech`, `education`, `entertainment`, `howto`, or a numeric YouTube category id | none sent | Any other value is ignored. |
+| `ytCategory` | `people-blogs`, `science-tech`, `education`, `entertainment`, `howto`, or a numeric YouTube category id | none sent | Any other value is refused. |
 | `ytPlaylistId` | YouTube playlist id | none | No tool lists playlists; use one the user gives you. The video is added after upload. If that fails, the video stays published and the post does not say so. |
 | `coverAssetId` | image media id | YouTube's frame | Custom thumbnail. YouTube accepts it only from phone-verified channels. A refusal leaves the video published and adds a `notice` to the post. |
 

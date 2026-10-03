@@ -5,6 +5,44 @@ Every release of this package, newest first. Versions follow
 one (`scripts/check.mjs` refuses a release where they differ). From 0.5.0
 on, each version tag gets a GitHub Release with the notes below.
 
+## 0.6.0 — 2026-10-03
+
+The iHatePosting server now checks what an agent sends instead of quietly
+ignoring it, and the skill, its references and the docs describe that.
+Several sentences here used to say the opposite, so this is a minor release.
+
+- **Option names and values are checked.** A key a network does not read
+  used to be saved and ignored: one customer's agent sent `madeForKids` five
+  times and was refused each time for the `ytMadeForKids` it never set, and
+  `privacy: "unlisted"` published a YouTube video publicly. Mastodon `direct`
+  posted as public. Now such a key or value is refused with a 400, drafts
+  included. The 400 names the key that was meant ("did you mean
+  ytMadeForKids?") and lists the network's options. `get_platform_rules`
+  lists every option with its allowed values, not only the required ones.
+- **A draft is scheduled with `update_post`.** `reschedule_post` refuses a
+  draft. It used to schedule one without the network checks, so a post could
+  be armed that the publisher would only skip at send time. `update_post`
+  with `action: "schedule"` runs the checks and splits the post per account.
+- **Times come back in the owner's timezone too.** Every reply that carries
+  `scheduledAt` (UTC) also carries `scheduledLocal`: date, time and timezone.
+  `whoami` returns `ownerTimezone`, and `list_posts` `from` and `to` are whole
+  days in that timezone.
+- **Refused instead of quietly dropped or changed:**
+  - a date sent without `action: "schedule"`, which was saved as a draft;
+  - a date that does not exist, such as 2027-02-30, which rolled into March;
+  - a media id that is not in the library;
+  - an unknown TikTok audience word, which became private.
+- **`validate_post` takes `create_post`'s arguments** (`options` and
+  `overrides` in the same shape, which it used to strip) and fills a missing
+  YouTube title the way `create_post` does, so the two answers agree.
+- **A refused tool call is marked as an error** (`isError`), so a host or a
+  workflow no longer reads a refused post as made.
+- **Uploads by link go one at a time per account.** A second one waits up to
+  20 seconds for its turn, then answers 429.
+- The hosted server carries all of this; the local npm server gets the tool
+  side in `ihateposting-mcp` 0.11.0. Every option value in the examples and
+  the docs' samples (36 of them) is one the new checks accept.
+
 ## 0.5.7 — 2026-10-02
 
 - **The local npm server needs Node.js 20 or later.** `ihateposting-mcp`

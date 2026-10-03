@@ -45,7 +45,9 @@ A missing, malformed, revoked or unknown key gets `401` with an `error` sentence
 - `scheduledDate`: `YYYY-MM-DD`
 - `scheduledTime`: `9:00 AM`, `12:30 PM` or 24-hour `17:00`
 
-Both are read in the timezone set in **Settings → Scheduling**. A time more than a minute in the past is refused with `400`. Responses give `scheduledAt` as a UTC ISO timestamp.
+Both are read in the timezone set in **Settings → Scheduling**, which `GET /api/v1/accounts` returns as `account.timezone`. These are refused with `400`: a date that does not exist (such as `2027-02-30`), a time more than a minute in the past, and a date or time sent with any `action` other than `schedule`.
+
+Responses give `scheduledAt` as a UTC ISO timestamp and, beside it, `scheduledLocal`: the same moment in that timezone, as `{ "date": "2026-10-04", "time": "12:40 PM", "timezone": "Asia/Kolkata" }`. Show people `scheduledLocal`.
 
 **Post statuses:** `draft`, `scheduled`, `publishing`, `published`, `partial` (some platforms published, some did not), `failed`.
 
@@ -84,14 +86,14 @@ Every route below takes `Authorization: Bearer pk_live_…`. The last column nam
 | Method | Path | What it does | MCP tool |
 |---|---|---|---|
 | GET | `/api/v1/accounts` | Your connected accounts, with their ids | `whoami`, `list_accounts` |
-| GET | `/api/v1/platforms` | What each platform accepts, and which options it requires | `get_platform_rules` |
+| GET | `/api/v1/platforms` | What each platform accepts, and every option it takes | `get_platform_rules` |
 | POST | `/api/v1/posts/validate` | Checks a post against each platform's rules without creating anything | `validate_post` |
 | POST | `/api/v1/posts` | Creates a post as a draft, scheduled for later, or sent now | `create_post` |
-| GET | `/api/v1/posts` | Your posts with each send's status. `?status=` and `?from=`/`?to=` (scheduled date, inclusive whole days), `?limit=` 1-200, `?cursor=` to page. Returns `total`, `returned`, `hasMore`, `nextCursor` | `list_posts` |
+| GET | `/api/v1/posts` | Your posts with each send's status. `?status=` and `?from=`/`?to=` (scheduled date, inclusive whole days in your timezone), `?limit=` 1-200, `?cursor=` to page. Returns `total`, `returned`, `hasMore`, `nextCursor` | `list_posts` |
 | GET | `/api/v1/posts/{id}` | One post in full: text, options, media, sends | `get_post` |
 | PATCH | `/api/v1/posts/{id}` | Replaces a draft, scheduled or failed post | `update_post` |
 | DELETE | `/api/v1/posts/{id}` | Removes a post from iHatePosting | `delete_post` |
-| POST | `/api/v1/posts/{id}/reschedule` | Moves a draft or scheduled post to a new date and time | `reschedule_post` |
+| POST | `/api/v1/posts/{id}/reschedule` | Moves a scheduled post to a new date and time (a draft is refused) | `reschedule_post` |
 | POST | `/api/v1/posts/{id}/retry` | Sends failed sends again | `retry_post` |
 | GET | `/api/v1/pinterest/boards` | The boards a Pinterest account can pin to | `list_pinterest_boards` |
 | GET | `/api/v1/media` | Your media library and storage use | `list_media` |
@@ -110,7 +112,7 @@ Returns whose key this is and the accounts connected to that login. Removed acco
 
 ```json
 {
-  "account": { "email": "you@example.com", "name": "Your Name" },
+  "account": { "email": "you@example.com", "name": "Your Name", "timezone": "Europe/London" },
   "accounts": [
     { "id": "ACCOUNT_ID", "platform": "bluesky", "handle": "you.bsky.social",
       "displayName": "You", "nickname": null, "status": "active" }
@@ -118,13 +120,15 @@ Returns whose key this is and the accounts connected to that login. Removed acco
 }
 ```
 
-Use an account `id` in `platforms` when creating a post to send to that one account rather than every account on the platform.
+Use an account `id` in `platforms` when creating a post to send to that one account rather than every account on the platform. `account.timezone` is the zone every `scheduledDate` and `scheduledTime` is read in.
 
 ### GET /api/v1/platforms
 
 One entry per platform: `maxChars`, `mediaKinds`, `maxImages`, `requiresMedia`, `requiresVideo`, `requiredOptions` (each with a `field` and a `message`) and, where the platform takes video, `video` limits (`formats`, `minDurationSec`, `maxDurationSec`, `maxSizeBytes`).
 
-`requiredOptions` comes from asking each platform's own publishing code what an empty post is missing, so it lists only options that are required. Optional settings are not listed here.
+`requiredOptions` comes from asking each platform's own publishing code what an empty post is missing, so it lists only options that are required.
+
+`options` lists every option the platform takes, each with its `key`, `type`, `required`, a `description` and, where they apply, the allowed `values`, a `format` and the `default` used when it is left out. These are the only keys the API accepts for that platform: any other key, or a value outside `values`, is refused with `400` (see [Option checks](#option-checks)).
 
 ## Posts
 
@@ -144,12 +148,12 @@ Runs the same per-platform checks the publisher runs before it sends, and create
 ```
 
 - `targets`: one entry per platform, each with an optional `contentOverride` (different text for that platform) and `options`.
-- `mediaIds`: up to 20 ids from your library, in attach order.
+- `mediaIds`: up to 20 ids from your library, in attach order. An id that is not in your library is refused with `400`, as on create.
 - Requests larger than 512 KB are refused with `413`.
 
-The answer is `{ "ok": true, "issues": {} }` when nothing is wrong. Otherwise `issues` maps each platform to a list of `{ code, message, field?, severity? }`. An issue with `severity: "warn"` is advice and does not stop the post. It also reports a platform with no connected account (`no_account`) or whose account needs reconnecting (`account_signed_out`), with the reason when iHatePosting knows it.
+The answer is `{ "ok": true, "issues": {} }` when nothing is wrong. Otherwise `issues` maps each platform to a list of `{ code, message, field?, severity? }`, and `ok` is `false` when any issue blocks the post. An issue with `severity: "warn"` is advice and does not stop the post. It also reports a platform with no connected account (`no_account`) or whose account needs reconnecting (`account_signed_out`), with the reason when iHatePosting knows it, and every option a platform would refuse (see [Option checks](#option-checks)).
 
-One difference from creating: when you create a post, iHatePosting fills some options you left out from your text (a YouTube title and tags, a Pinterest title and link, Tumblr tags). Validation does not fill them, so it can report a missing YouTube title that creating would have supplied. Set the option yourself if you want both answers to agree.
+Validation fills the options that creating fills from your text when you leave them out (a YouTube title and tags, a Pinterest title and link, Tumblr tags), so both answers agree.
 
 ### POST /api/v1/posts
 
@@ -167,9 +171,9 @@ One difference from creating: when you create a post, iHatePosting fills some op
 | `platforms` | yes | Platform names, account ids from `GET /api/v1/accounts`, or both. A platform name targets every active account on that platform. |
 | `action` | yes | `draft`, `schedule` or `now`. There is no default: leaving it out returns `400`. `now` and `schedule` publish to real audiences. |
 | `scheduledDate`, `scheduledTime` | with `schedule` | See [Conventions](#conventions). |
-| `options` | no | Per-platform settings, keyed by platform name, for example `{ "pinterest": { "boardId": "BOARD_ID" } }`. |
+| `options` | no | Per-platform settings, keyed by platform name, for example `{ "pinterest": { "boardId": "BOARD_ID" } }`. Keys and values are checked; see [Option checks](#option-checks). |
 | `overrides` | no | Different text for one platform, keyed by platform name. |
-| `mediaIds` | no | Up to 20 library ids, in attach order. |
+| `mediaIds` | no | Up to 20 library ids, in attach order. An id that is not in your library is refused with `400`, naming it under `unknownMediaIds`. |
 
 Response `201`:
 
@@ -197,13 +201,22 @@ A post sent with `now` is stored as `scheduled` for the current moment and picke
 
 A draft skips those checks, with one exception: unless you are on a paid Pro plan, a post to X whose X text contains a link is refused (`403`) even as a draft. That includes the free trial. Use `overrides.x` to send X a version without the link.
 
+### Option checks
+
+Every request that takes `options` (create, validate and PATCH, drafts included) checks them against `options` in `GET /api/v1/platforms`:
+
+- A key the platform does not read is refused with `400`. The `error` suggests the key you most likely meant, for example `options.youtube.madeForKids is not a YouTube option — did you mean ytMadeForKids?`, and lists that platform's options.
+- A value outside the allowed `values`, or of the wrong type, is refused the same way. A true/false option takes JSON `true` or `false`, not the text `"true"`.
+- Every problem is named in one answer, with a machine-readable `issues` map beside the `error`.
+- On PATCH, options already stored on the post (as `GET /api/v1/posts/{id}` shows them) are accepted back unchanged, so a read-then-write round trip never fails on an older key.
+
 ### GET /api/v1/posts
 
-Your posts, 50 to a page by default (`?limit=` 1 to 200). Filter with `?status=` and `?from=`/`?to=` (the scheduled date, inclusive whole days), and page with `?cursor=` set to the previous page's `nextCursor`. With a date filter or `status=scheduled` the list runs in calendar order, earliest first; otherwise it is newest created first. The reply carries `total` (every post matching the filter), `returned`, `hasMore` and `nextCursor`, so count from `total`, never from the page. Each post has `id`, `baseContent`, `status`, `scheduledAt`, `publishedAt` and `targets`, where each target has `id`, `platform`, `status`, `externalUrl` (the live post, once published) and `error`. Deleted posts are left out.
+Your posts, 50 to a page by default (`?limit=` 1 to 200). Filter with `?status=` and `?from=`/`?to=` (the scheduled date, inclusive whole days in your timezone), and page with `?cursor=` set to the previous page's `nextCursor`, exactly as given and with the same filters. With a date filter or `status=scheduled` the list runs in calendar order, earliest first; otherwise it is newest created first. The reply carries `total` (every post matching the filter), `returned`, `hasMore` and `nextCursor`, so count from `total`, never from the page. Each post has `id`, `baseContent`, `status`, `scheduledAt`, `scheduledLocal`, `publishedAt` and `targets`, where each target has `id`, `platform`, `status`, `externalUrl` (the live post, once published) and `error`. Deleted posts are left out.
 
 ### GET /api/v1/posts/{id}
 
-The full post: `baseContent`, `status`, `scheduledAt`, `batchId`, each target's `socialAccountId`, `platform`, `contentOverride`, `options`, `status`, `externalUrl`, `error` and `notice` (something worth knowing about a send that did publish), and the attached `media` in order. `siblingCount` says how many other posts were saved together with this one (see PATCH below).
+The full post: `baseContent`, `status`, `scheduledAt`, `scheduledLocal`, `batchId`, each target's `socialAccountId`, `platform`, `contentOverride`, `options`, `status`, `externalUrl`, `error` and `notice` (something worth knowing about a send that did publish), and the attached `media` in order. `siblingCount` says how many other posts were saved together with this one (see PATCH below).
 
 ### PATCH /api/v1/posts/{id}
 
@@ -227,7 +240,7 @@ The field names differ from creating:
 - A scheduled post cannot be turned back into a draft (`409`). Reschedule it, or delete it.
 - Published, partly published and publishing posts cannot be edited (`409`).
 
-**Posts to several accounts split when they are scheduled.** A draft to three accounts is one post. When a PATCH schedules it or sends it now, it becomes one post per account, sharing a `batchId`. The response is `{ "ok": true, "posts": 3, "batchId": "…" }`. After that:
+**Posts to several accounts split when they are scheduled.** A draft to three accounts is one post. When a PATCH schedules it or sends it now, it becomes one post per account, sharing a `batchId`. The response is `{ "ok": true, "posts": 3, "batchId": "…", "scheduledAt": "…", "scheduledLocal": { … }, "rows": [{ "postId": "…", "platforms": ["…"] }], "warnings": [] }`, where `rows` names each post and the platforms it carries. After that:
 
 - PATCH on one of those posts can change its text, options and media, as long as you send that post's own `accountIds`. Adding or swapping an account is refused with `409`, because that would change the group through one row of it; edit the group in the iHatePosting app instead.
 - Reschedule and delete act on the one post you name, not the group.
@@ -240,15 +253,17 @@ Removes the post from iHatePosting. Deleting a scheduled post stops it from goin
 
 Deleting never removes anything from the social network. A post that has already published (`published` or `partial`) is refused with `409` and `"needsForce": true`, unless you add `?force=1`. With `force=1` only iHatePosting's record is removed, and the post stays live on the platform. A post that is `publishing` right now cannot be deleted, forced or not.
 
+The answer is `{ "ok": true, "platformsRemoved": ["youtube"] }`. When the post was one send of a group (a shared `batchId`), it also carries `stillScheduled`, the group's other sends that will still go out, with their `scheduledAt` and `scheduledLocal`, and `otherSends`, the group's sends in any other status.
+
 ### POST /api/v1/posts/{id}/reschedule
 
 ```json
 { "scheduledDate": "2026-10-01", "scheduledTime": "9:00 AM" }
 ```
 
-Works on `draft` and `scheduled` posts. It changes only the time and returns `{ "ok": true, "scheduledAt": "…" }`.
+Works on `scheduled` posts. It changes only the time and returns `{ "ok": true, "scheduledAt": "…", "scheduledLocal": { … } }`. The trial end, the Free plan's scheduling allowance and the X post caps described under create apply here.
 
-**Rescheduling a draft schedules it.** The draft becomes a scheduled post that will publish at the new time. This route does not run the platform checks that create does. The publisher still checks at send time and skips a send that breaks a platform's rules, so call `/validate` before you reschedule a draft. The trial end, the Free plan's scheduling allowance and the X post caps described under create do apply here.
+**A draft is refused with `409`.** Schedule a draft with `PATCH /api/v1/posts/{id}` and `action` `schedule`: that runs the platform checks create runs, and splits a post to several accounts into one post per account. (In the iHatePosting app, moving a draft on the calendar still schedules it.)
 
 ### POST /api/v1/posts/{id}/retry
 
@@ -258,7 +273,7 @@ Works on `draft` and `scheduled` posts. It changes only the time and returns `{ 
 
 Sends a post's failed sends again. Leave out `targetId` to retry every failed send on the post. Target ids appear in `GET /api/v1/posts` and in the create response. Sends that published are never re-sent.
 
-Returns `{ "ok": true, "retried": 1 }`. Returns `409` when nothing on the post failed, or when every failed send's account needs reconnecting or was removed (the message says what to do). If only some of those accounts are affected, the other sends are retried. Returns `403` after the free trial has ended.
+Returns `{ "ok": true, "retried": 1 }`. Returns `409` when nothing on the post failed, or when every failed send's account needs reconnecting or was removed (the message says what to do). A send that iHatePosting's own checks `skipped` is not retried either: the `409` gives the reason it was skipped, and the fix is a PATCH, which checks the post again. If only some of those accounts are affected, the other sends are retried. Returns `403` after the free trial has ended.
 
 ## Pinterest boards
 
@@ -306,6 +321,8 @@ POST /api/v1/media/from-url
 ```
 
 We fetch the file ourselves and run the same checks as confirm. It can be an image, a video, or a PDF for a LinkedIn document post. `url` is required (up to 2,048 characters); `filename` (up to 200) and `altText` (up to 1,000) are optional. The answer is the same as confirm's: `201` and `{ "asset": { "id": "MEDIA_ID", … } }`. A link that cannot be reached, needs a sign-in or serves an empty file gets `400` with the reason; the wrong kind of file gets `415`, and one that is too large gets `413`. A file still arriving after 60 seconds, or one whose download breaks off, gets `504`, and nothing is saved. Up to 20 of these a minute.
+
+Links are fetched one at a time per account, and only a few at once across the server. A request waits up to 20 seconds for its turn, then gets `429` with `Retry-After: 5`, and nothing is saved. Send uploads one after another rather than all at once.
 
 ### Upload with presign, PUT and confirm
 

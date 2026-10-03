@@ -57,10 +57,11 @@ allows the account.
 ## Scheduling and changing posts
 
 **9. "Schedule the draft about the community call for Thursday at 9:00 AM."**
-`list_posts` → `get_post` → `validate_post` → `reschedule_post`.
-Rescheduling a draft makes it a scheduled post that will publish, and it skips
-the platform checks `create_post` runs, so the agent validates first. The time is read
-in your iHatePosting timezone.
+`list_posts` → `get_post` → `validate_post` → `update_post`. The agent sends
+the draft back as `get_post` shows it, with `"action": "schedule"` and the
+date and time, which runs each network's checks and makes it a scheduled post
+that will publish. `reschedule_post` refuses a draft. The time is read in your
+iHatePosting timezone.
 
 **10. "Move tomorrow's LinkedIn post to Friday at 10:00 AM."**
 `list_posts` → `reschedule_post`. A post that has already published cannot be

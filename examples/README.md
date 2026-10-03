@@ -192,6 +192,7 @@ both.
 TikTok needs a video, or photos for a slideshow. `tiktokPrivacy` accepts
 `public`, `followers`, `friends` or `private` (TikTok's own values such as
 `SELF_ONLY` work too), and it must be an audience TikTok offers that account.
+Any other word is refused.
 **With no `tiktokPrivacy`, the post goes to the widest audience TikTok offers
 the account, which is everyone for a public account.** Ask the user before
 you leave it out. Comments, Duets and Stitches stay off unless their
@@ -217,7 +218,8 @@ override keyed by a platform name applies to every account on that platform.
 
 One text to four community channels. `linkCard: false` stops Discord from
 unfurling the link; it does the same for a text-only Telegram message.
-`mastodonVisibility` takes `public` (the default), `unlisted` or `private`.
+`mastodonVisibility` takes `public` (the default), `unlisted` or `private`;
+`direct` is refused.
 Mentions in a Discord post do not notify anyone.
 
 ## When the user wants it to go out
@@ -227,13 +229,14 @@ Then either:
 
 - create it with `"action": "schedule"`, `"scheduledDate": "2026-10-01"` and
   `"scheduledTime": "9:00 AM"`, or
-- call `reschedule_post` with the draft's id and the same date and time.
+- schedule the draft with `update_post`: send it back as `get_post` shows it,
+  with `"action": "schedule"` and the same date and time. That runs the
+  platform checks `create_post` runs. `reschedule_post` refuses a draft.
 
-Times are read in the account owner's iHatePosting timezone. `scheduledDate`
-and `scheduledTime` have no effect on a draft, so a draft never publishes on
-its own. `reschedule_post` turns a draft into a scheduled post without
-running the platform checks that `create_post` runs, so call `validate_post`
-first.
+Times are read in the account owner's iHatePosting timezone (`ownerTimezone`
+from `whoami`), and replies show them as `scheduledLocal` beside the UTC
+`scheduledAt`. A date sent without `"action": "schedule"` is refused rather
+than saved, so a draft never publishes on its own.
 Use `"action": "now"` only when the user asks for the post to go out now.
 
 ## Sending an example over the REST API

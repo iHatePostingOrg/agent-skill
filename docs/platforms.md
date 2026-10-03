@@ -22,13 +22,13 @@ This page lists what each one accepts: post types, text limits, media, the optio
 }
 ```
 
-Option keys are case-sensitive. The REST API accepts keys up to 60 characters.
+Option keys are case-sensitive. The REST API accepts keys up to 60 characters. A key a network does not read, or a value outside its list, is refused with a `400` that names the right key or the allowed values. That check runs on every call, drafts included. `GET /api/v1/platforms` (`get_platform_rules`) lists every option each network takes.
 
 What happens when a check fails:
 
-- A draft is saved even if a network would refuse it. The exception is the X link rule (see X below), which applies to drafts too.
+- A draft is saved even if a network would refuse it, as long as its option keys and values are ones the network takes. The X link rule (see X below) applies to drafts too.
 - A post created with `schedule` or `now` is refused straight away, with the first blocking reason.
-- `reschedule_post` turns a draft into a scheduled post without that create-time check. The send-time check below still runs.
+- `reschedule_post` refuses a draft. Schedule a draft with `update_post` and `action` `schedule`, which runs the create-time check.
 - iHatePosting checks every network again just before it sends. A send that fails that check is marked `skipped` and never reaches the network.
 
 ### Options that work on more than one network
@@ -58,7 +58,7 @@ What happens when a check fails:
 - **Media:** up to 4 images, or 1 video, but not both. Images over Bluesky's 2 MB limit are compressed before upload instead of being refused. Video: MP4, up to 10 minutes and 300,000,000 bytes.
 - **Required:** nothing.
 - **Options:**
-  - `label`: `suggestive`, `nudity` or `graphic`. Sets a Bluesky content label on every post in the thread.
+  - `label`: `none` (the default), `suggestive`, `nudity` or `graphic`. Sets a Bluesky content label on every post in the thread.
   - `lang`: a language code such as `en`.
   - `linkCard`: `false` stops the link preview. Without it, the first link in the opening post gets a preview card when there is no media. YouTube links never get one.
 - **First comment:** no. **Alt text:** yes, for images and video. **Analytics:** collected.
@@ -70,7 +70,7 @@ What happens when a check fails:
 - **Media:** up to 4 images, or 1 video, but not both. Images: JPEG, PNG, GIF or WebP, up to 5 MB (GIFs up to 15 MB). Video: MP4 or MOV, 0.5 seconds to 20 minutes, 60 fps or less.
 - **Required:** nothing.
 - **Options** (these apply to the first post of a thread):
-  - `xReplySettings`: `following`, `mentioned`, `subscribers` or `verified`. Leave it out to let everyone reply.
+  - `xReplySettings`: `everyone` (the default), `following`, `mentioned`, `subscribers` or `verified`.
   - `xCommunity`: a Community id, or its `x.com/i/communities/…` link. The account has to be a member.
   - `xMadeWithAi`: `true` marks the post as made with AI.
   - `xPaidPartnership`: `true` marks it as a paid partnership.
@@ -98,7 +98,7 @@ What happens when a check fails:
 - **Required:** nothing.
 - **Options:**
   - `fbType`: `reel` or `story`. Leave it out for a feed post. A Story carries no caption.
-  - `fbLink`: a URL shown as a link preview. Text-only posts only.
+  - `fbLink`: a URL shown as a link preview. Text-only posts only: with media attached, a scheduled or publish-now post is refused.
   - `coverAssetId`: the video thumbnail.
 - **First comment:** no. **Alt text:** not sent. **Analytics:** collected.
 
@@ -206,7 +206,7 @@ What happens when a check fails:
 - **Media:** required. One video, or up to 35 photos (no more than 20 per post here, see Media above), but not both. Photos: JPEG or WebP (not PNG), up to 20 MB each, with the shorter side at most 1,080 pixels. Video: MP4, MOV or WebM, H.264, HEVC, VP8 or VP9, 23 to 60 fps, up to 10 minutes.
 - **Required:** nothing beyond the media. Set `tiktokPrivacy` anyway (see below).
 - **Options:**
-  - `tiktokPrivacy`: `public`, `followers`, `friends` or `private`. TikTok's own values (`PUBLIC_TO_EVERYONE`, `FOLLOWER_OF_CREATOR`, `MUTUAL_FOLLOW_FRIENDS`, `SELF_ONLY`) work too. **If you leave it out, the post goes to the widest audience TikTok offers the account, which is public for a public account.** Any other lowercase word is treated as `private`.
+  - `tiktokPrivacy`: `public`, `followers`, `friends` or `private`. TikTok's own values (`PUBLIC_TO_EVERYONE`, `FOLLOWER_OF_CREATOR`, `MUTUAL_FOLLOW_FRIENDS`, `SELF_ONLY`) work too. **If you leave it out, the post goes to the widest audience TikTok offers the account, which is public for a public account.** Any letter case works; any other word is refused.
   - `tiktokAllowComment`, `tiktokAllowDuet`, `tiktokAllowStitch`: `true` to allow each one. All are off unless you turn them on.
   - `tiktokAiGenerated`: `true` labels a video as AI-generated. TikTok has no such label for slideshows.
   - `tiktokYourBrand`: `true` discloses that you are promoting your own brand.
@@ -222,7 +222,7 @@ What happens when a check fails:
 - **Text:** a description of up to 5,000 bytes. `<` and `>` count as 4 each, and accented, non-Latin and emoji characters count as 2 to 4.
 - **Media:** exactly one video, 1 second to 12 hours. No images.
 - **Required:**
-  - `ytTitle`: up to 100 characters. If you leave it out, `create_post` fills it from the first line of the text. `validate_post` doesn't fill it, so `validate_post` may report a missing title that `create_post` would supply.
+  - `ytTitle`: up to 100 characters. If you leave it out, `create_post` and `validate_post` fill it from the first line of the text.
   - `ytMadeForKids`: `true` or `false` (`"yes"` and `"no"` work too). This is YouTube's made-for-kids declaration, and there is no default.
 - **Options:**
   - `ytPrivacy`: `public` (the default), `unlisted` or `private`.

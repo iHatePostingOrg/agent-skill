@@ -98,13 +98,13 @@ itself. The last column is what a tool does to your posts and accounts.
 |------|--------------|--------|
 | `whoami` | Names the iHatePosting login this connection acts for (email and account name), whether it signed in or uses a key; not a social handle | Reads |
 | `list_accounts` | Lists connected social accounts with platform, handle, status and id | Reads |
-| `get_platform_rules` | Each network's character limit, media rules, video formats and length, and required options | Reads |
+| `get_platform_rules` | Each network's character limit, media rules, video formats and length, and every option it takes, with the allowed values | Reads |
 | `validate_post` | Checks a post against every network you name, without creating anything | Reads |
 | `create_post` | Creates a post: a draft by default, or `now` or `schedule` when asked | Creates; publishes with `now` or `schedule` |
 | `list_posts` | Posts with each network's status and live URL — filter by `status` and a `from`/`to` scheduled-date range, page with `cursor`, and read `total` for the real count | Reads |
 | `get_post` | One post in full: text, per-network copy and options, media, and each send's result or error | Reads |
 | `update_post` | Replaces a draft, scheduled or failed post with what you send | Changes; publishes with `now` or `schedule` |
-| `reschedule_post` | Moves a draft or scheduled post to a new date and time | Publishes at the new time, including a draft |
+| `reschedule_post` | Moves a scheduled post to a new date and time; refuses a draft | Publishes at the new time |
 | `retry_post` | Sends again only what failed, on one network or all of them | Publishes |
 | `delete_post` | Removes iHatePosting's record of a post; a published post needs `force` | Deletes; never unpublishes |
 | `list_media` | Your media library, newest first, with the ids posts attach | Reads |
@@ -410,9 +410,17 @@ on your behalf, so keep it out of chats, screenshots and shared files.
   it. Drafts skip this check, so an unfinished post can be saved. The
   publisher checks each send again just before posting and skips one that
   fails.
-- **Rescheduling a draft publishes it.** `reschedule_post` turns a draft into
-  a scheduled post, and the create-time check does not run on that path. Call
-  `validate_post` first.
+- **Option names and values are checked on every post, drafts included.** A
+  key a network does not read (`madeForKids` for `ytMadeForKids`), or a value
+  it does not take, is refused with a message naming the right one, rather
+  than saved and ignored.
+- **A draft is scheduled with `update_post`.** `reschedule_post` refuses a
+  draft. `update_post` with `action: "schedule"` runs the create-time check
+  and splits the post per account, like `create_post`.
+- **Times come back in two forms.** `scheduledAt` is UTC; `scheduledLocal`
+  beside it is the same moment in the account owner's timezone, which
+  `whoami` names as `ownerTimezone`. A date sent without
+  `action: "schedule"`, or a date that does not exist, is refused.
 - **A scheduled post cannot go back to being a draft.** `update_post` refuses
   that. Delete the post and create it again as a draft.
 - **Scheduling a multi-network post splits it.** When `create_post` or
@@ -642,6 +650,9 @@ Plans and prices: [ihateposting.com/pricing](https://ihateposting.com/pricing).
 - **Refused when creating or updating.** The message is the network's own
   rule, for example a caption over the limit or missing media. Fix it, or give
   that network an override, and send again. A draft skips these checks.
+- **Refused for an option ("did you mean ytPrivacy?").** The key or value is
+  not one that network takes. Use the one the message names;
+  `get_platform_rules` lists every option. This check runs on drafts too.
 - **YouTube is refused.** It needs one video, a title, and the made-for-kids
   declaration: set `ytMadeForKids` to `true` or `false` in the `youtube`
   options. Privacy is public unless you set `ytPrivacy`.
@@ -652,7 +663,8 @@ Plans and prices: [ihateposting.com/pricing](https://ihateposting.com/pricing).
 - **TikTok went to the wrong audience, or not at all.** Without
   `tiktokPrivacy`, a post sent through the agent or the API goes to the widest
   audience TikTok offers that account, which is public for a public account.
-  Set it to `public`, `followers`, `friends` or `private`. With
+  Set it to `public`, `followers`, `friends` or `private`; any other word is
+  refused. With
   `tiktokSendAsDraft`, the video goes to the creator's TikTok inbox and is
   reported as done, but it is only public once they post it in the TikTok
   app.
