@@ -5,6 +5,32 @@ Every release of this package, newest first. Versions follow
 one (`scripts/check.mjs` refuses a release where they differ). From 0.5.0
 on, each version tag gets a GitHub Release with the notes below.
 
+## 0.7.0 — 2026-10-05
+
+An agent's three most common dead ends on iHatePosting now get a precise
+answer instead of a bare refusal, and the skill and docs say how to read it.
+One sentence in the skill said the opposite of what is now true (that
+`validate_post` takes platform names only), so this is a minor release.
+
+- **`validate_post` takes account ids.** Its `platforms` is now exactly
+  `create_post`'s: a name checks every active account on that platform, an
+  account id checks that one account. Agents that handed `validate_post`
+  the same arguments as `create_post`, as the skill says to, were refused
+  for the id. Needs the iHatePosting MCP server 0.12.0 (npm) or the hosted
+  connector; `ihateposting post --to <account id> --check` works from CLI
+  0.6.0.
+- **An account id as an `options` or `overrides` key** is read as that
+  account's platform. One customer's agent keyed YouTube's options by the
+  account id and got only "Invalid key in record". Two keys for one platform
+  are refused, saying options apply per platform.
+- **A 404 on a post says which kind it is.** `post_deleted` with
+  `deletedAt` when the post was deleted or removed (an agent that deleted
+  three posts and read them back to check was told only "not found");
+  `post_not_found` when no post in the account has that id, with
+  `didYouMean` when the id is one of the user's with a few characters
+  wrong. The skill says to confirm a suggested post with the user before
+  acting on it.
+
 ## 0.6.0 — 2026-10-03
 
 The iHatePosting server now checks what an agent sends instead of quietly

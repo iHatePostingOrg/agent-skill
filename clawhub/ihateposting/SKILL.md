@@ -159,7 +159,9 @@ reports, then call `create_post`.
 - Each LinkedIn member profile and each LinkedIn Page is its own account. To
   post as one Page only, send that Page's account id; the name `linkedin`
   posts to every connected LinkedIn account.
-- `validate_post` takes platform NAMES only. Never send an account id there.
+- `validate_post` takes `platforms` exactly as `create_post` does: a name
+  checks every active account on that platform, an account id checks that
+  one account. Hand it the same arguments you will hand `create_post`.
 - Scheduling: `action: "schedule"` with `scheduledDate` (YYYY-MM-DD) and
   `scheduledTime` (for example `9:00 AM`). Times are read in the account
   owner's iHatePosting timezone, which `whoami` returns as `ownerTimezone`,
@@ -342,6 +344,7 @@ marked as an error (`isError`), with the reason in its text.
 | "iHatePosting API 401" | A wrong, replaced or unfilled key | The user checks the server's setup against the agent's page |
 | An account is `needs_reauth` | The user must reconnect it | Say so; its sends are held until then |
 | A name under `unresolved` | No active account matched it | Tell the user; never report it as posted |
+| A 404 on a post | `code` `post_deleted`: it was deleted or removed, at `deletedAt`. `post_not_found`: no post in this account has that id | Do not retry it; `list_posts` has the current ids. If the answer carries `didYouMean`, confirm with the user that it is the post they mean before you act on it |
 | Refused on create or update | A network rule, in the network's words | Fix it or give that network an override |
 | A 400 naming an option ("did you mean ytPrivacy?") | A key or value that network does not take | Use the key or value it names; `get_platform_rules` lists them all |
 | `reschedule_post` refuses a draft | Drafts are scheduled with `update_post` | `update_post` with `action: "schedule"`, once the user says yes |

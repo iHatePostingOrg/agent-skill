@@ -38,7 +38,7 @@ A missing, malformed, revoked or unknown key gets `401` with an `error` sentence
 
 ## Conventions
 
-**Errors.** A failed request returns an HTTP error status and a body like `{ "error": "That time is in the past — pick a future slot." }`. Most of these sentences are written to be shown to a person as is; a few are short, such as `"not found"` or `"invalid request"`.
+**Errors.** A failed request returns an HTTP error status and a body like `{ "error": "That time is in the past — pick a future slot." }`. Most of these sentences are written to be shown to a person as is; a few are short, such as `"invalid request"`. A post that is not there answers `404` with a sentence and a `code`: `post_deleted`, with `deletedAt`, when it was deleted or removed; `post_not_found` when no post in your account has that id. With a key, a `post_not_found` for an id that is one of yours with a few characters wrong also carries `didYouMean`: that post's `postId`, `status`, `createdAt`, `scheduledAt` and the start of its `text`.
 
 **Dates and times.** Scheduling takes a wall-clock date and time, not a timestamp:
 
@@ -148,6 +148,8 @@ Runs the same per-platform checks the publisher runs before it sends, and create
 ```
 
 - `targets`: one entry per platform, each with an optional `contentOverride` (different text for that platform) and `options`.
+- `platforms`: instead of `targets`, the field create takes: platform names, account ids from `GET /api/v1/accounts`, or both. A name checks every active account on that platform; an account id checks that one account. Send `platforms` or `targets`, not both. An id that is none of your accounts is reported under `account` with code `unresolved`.
+- `options` and `overrides`: create's per-platform maps, folded into the targets. A target's own values win.
 - `mediaIds`: up to 20 ids from your library, in attach order. An id that is not in your library is refused with `400`, as on create.
 - Requests larger than 512 KB are refused with `413`.
 
@@ -208,6 +210,7 @@ Every request that takes `options` (create, validate and PATCH, drafts included)
 - A key the platform does not read is refused with `400`. The `error` suggests the key you most likely meant, for example `options.youtube.madeForKids is not a YouTube option — did you mean ytMadeForKids?`, and lists that platform's options.
 - A value outside the allowed `values`, or of the wrong type, is refused the same way. A true/false option takes JSON `true` or `false`, not the text `"true"`.
 - Every problem is named in one answer, with a machine-readable `issues` map beside the `error`.
+- `options` and `overrides` are keyed by platform name. An account id from `GET /api/v1/accounts` used as the key is read as that account's platform; two keys for one platform (the name and an id, or two accounts' ids) are refused with `400`, because options apply per platform, not per account.
 - On PATCH, options already stored on the post (as `GET /api/v1/posts/{id}` shows them) are accepted back unchanged, so a read-then-write round trip never fails on an older key.
 
 ### GET /api/v1/posts

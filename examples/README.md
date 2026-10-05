@@ -30,10 +30,13 @@ placeholders do not always cause an error:
 ## Validate first, then create
 
 `validate_post` runs the same checks the publisher runs and creates nothing.
-Its arguments are shaped a little differently from `create_post`, so convert
-them before you call it:
+It takes `create_post`'s own arguments, so hand it the same object you will
+hand `create_post`: `text`, `platforms` (names or account ids), `options`,
+`overrides`, `mediaIds`, and `action` with its date and time. It also takes
+a `targets` list instead of `platforms`, one entry per platform with its own
+text and options:
 
-| `create_post` | `validate_post` |
+| `create_post` | `validate_post`, the `targets` form |
 |---|---|
 | `text` | `text` |
 | `platforms` (names or account ids) | `targets[].platform` (platform names only) |
