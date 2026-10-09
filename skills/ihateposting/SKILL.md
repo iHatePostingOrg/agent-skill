@@ -27,6 +27,12 @@ ihateposting.com. This plugin gives you its tools over MCP (server
   with the user first.
 - To schedule a **draft**, call `update_post` with `action: "schedule"`. That
   publishes too, so confirm first. `reschedule_post` refuses a draft.
+- To **change a scheduled post** and keep it going out, read it with
+  `get_post`, then send `update_post` with `action: "schedule"` and its
+  `scheduledLocal` date and time. `action: "draft"` on a scheduled post is
+  refused, because it would take the post off the schedule; the refusal names
+  the exact call to make. `reschedule_post` only moves a post's time and
+  cannot change its text.
 - A `scheduledDate` or `scheduledTime` sent without `action: "schedule"` is
   refused, never saved as a draft. Say "schedule" when you mean it.
 - When the user's intent is unclear, save a draft and say that you did.

@@ -5,6 +5,23 @@ Every release of this package, newest first. Versions follow
 one (`scripts/check.mjs` refuses a release where they differ). From 0.5.0
 on, each version tag gets a GitHub Release with the notes below.
 
+## 0.7.1 — 2026-10-09
+
+How to change a scheduled post, said outright. An agent editing a scheduled
+post sent `action: "draft"`, was refused, tried the same call eight times and
+then moved to `reschedule_post`, which cannot change text, so the edit was
+never made.
+
+- **Changing a scheduled post.** Read it with `get_post`, then send
+  `update_post` with `action: "schedule"` and its `scheduledLocal` date and
+  time: it is changed and stays scheduled. `action: "draft"` on a scheduled
+  post is refused, because it would take the post off the schedule, and the
+  refusal now names the exact call to make. `reschedule_post` only moves a
+  post's time. Added to both skills and to `docs/platforms.md`.
+- **`get_platform_rules` needs no key.** It lists public facts, the same for
+  everyone, so a client that has not signed in yet can read them. Needs the
+  iHatePosting MCP server 0.12.1 (npm) or the hosted connector.
+
 ## 0.7.0 — 2026-10-05
 
 An agent's three most common dead ends on iHatePosting now get a precise
