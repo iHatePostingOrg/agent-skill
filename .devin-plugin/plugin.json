@@ -1,0 +1,17 @@
+{
+  "name": "ihateposting",
+  "displayName": "iHatePosting",
+  "description": "Draft, check and schedule posts to 14 social networks from Devin: X, LinkedIn, Instagram, Facebook, TikTok, YouTube, Threads, Bluesky, Pinterest, Mastodon, Telegram, Discord, Tumblr and Slack. You sign in with your iHatePosting account, and every post is a draft until you say otherwise.",
+  "homepage": "https://ihateposting.com",
+  "repository": "https://github.com/iHatePostingOrg/agent-skill",
+  "logo": "assets/logo.svg",
+  "keywords": [
+    "Communication",
+    "Productivity"
+  ],
+  "mcpServers": {
+    "ihateposting": {
+      "url": "https://ihateposting.com/mcp/oauth"
+    }
+  }
+}
