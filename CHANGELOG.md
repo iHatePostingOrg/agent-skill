@@ -5,6 +5,16 @@ Every release of this package, newest first. Versions follow
 one (`scripts/check.mjs` refuses a release where they differ). From 0.5.0
 on, each version tag gets a GitHub Release with the notes below.
 
+## Unreleased
+
+- **The command line's skill, installable by any agent.** `npx skills add
+  iHatePostingOrg/agent-skill --skill ihateposting-cli` sets up
+  `cli/ihateposting-cli/SKILL.md` for Claude Code, Cursor, Codex, GitHub
+  Copilot and the other agents the open `skills` installer knows. It is the
+  guidance `ihateposting skill` writes, for an agent that posts with the
+  `ihateposting` command line. It sits outside `skills/`, so no plugin ships
+  it and every plugin above is unchanged; the manifests keep version 0.7.1.
+
 ## 0.7.1 — 2026-10-09
 
 How to change a scheduled post, said outright. An agent editing a scheduled

@@ -324,6 +324,33 @@ if (existsSync(join(ROOT, CH))) {
   if (!a.equals(b)) fail(`${CH}/references/platform-options.md: differs from the plugin's copy`);
 }
 
+// 8. The command line's skill (cli/ihateposting-cli), installed with
+// `npx skills add iHatePostingOrg/agent-skill --skill ihateposting-cli`. It is
+// kept OUT of skills/, which the plugins discover by default, so no plugin
+// starts shipping guidance for a tool its users never installed. Installers
+// and directory scanners read it like the ClawHub copy, so the same rules.
+const CLI_SKILL = "cli/ihateposting-cli/SKILL.md";
+if (existsSync(join(ROOT, "skills/ihateposting-cli"))) fail("skills/ihateposting-cli: the CLI skill must not sit in skills/, where every plugin would ship it");
+if (!existsSync(join(ROOT, CLI_SKILL))) {
+  fail(`${CLI_SKILL}: missing`);
+} else {
+  const rawCli = readFileSync(join(ROOT, CLI_SKILL));
+  if (rawCli[0] === 0xef && rawCli[1] === 0xbb && rawCli[2] === 0xbf) fail(`${CLI_SKILL}: starts with a UTF-8 BOM, which hides the frontmatter`);
+  const cliText = rawCli.toString("utf8");
+  if (!/^---\r?\n/.test(cliText)) fail(`${CLI_SKILL}: --- must be the very first line`);
+  const cliFm = cliText.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
+  if (!/^name:\s*ihateposting-cli\s*$/m.test(cliFm)) fail(`${CLI_SKILL}: name must be ihateposting-cli, the folder's name`);
+  const cliDesc = cliFm.match(/^description:\s*(.*)$/m)?.[1]?.trim() ?? "";
+  if (!cliDesc || cliDesc.length > 1024) fail(`${CLI_SKILL}: description must be 1 to 1024 characters`);
+  if (cliText.includes("$")) fail(`${CLI_SKILL}: contains a dollar sign`);
+  if (/\bpass/i.test(cliText)) fail(`${CLI_SKILL}: contains "pass"`);
+  if (cliText.includes(KEY_REF)) fail(`${CLI_SKILL}: contains ${KEY_REF}`);
+  // Publishing is the one step that cannot be undone: the warning comes first.
+  const warn = cliText.indexOf("cannot be undone");
+  const firstNow = cliText.search(/ihateposting post [^\n]*--now/);
+  if (warn === -1 || (firstNow !== -1 && warn > firstNow)) fail(`${CLI_SKILL}: must warn that --now cannot be undone before it shows --now`);
+}
+
 if (problems.length) {
   console.error(`${problems.length} problem(s):\n- ${problems.join("\n- ")}`);
   process.exit(1);

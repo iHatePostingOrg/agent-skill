@@ -540,7 +540,20 @@ ihateposting skill                                         # writes .claude/skil
 line cannot set per-network options yet, so a Pinterest board or YouTube's
 made-for-kids answer needs the MCP tools or the REST API. Every command exits
 0 on success and 1 on failure. `ihateposting skill --print` prints the CLI's
-own skill instead of writing it. The settings the command line and the npm
+own skill instead of writing it.
+
+To give the CLI's skill to any agent — Claude Code, Cursor, Codex, GitHub
+Copilot and the rest — install it from this repository with the open
+[`skills`](https://github.com/vercel-labs/skills) installer, which asks which
+agents to set it up for:
+
+```bash
+npx skills add iHatePostingOrg/agent-skill --skill ihateposting-cli
+```
+
+It is `cli/ihateposting-cli/SKILL.md`: the same guidance `ihateposting skill`
+writes, for an agent that posts with the command line. It is not part of any
+plugin above. The settings the command line and the npm
 server read are listed in their own READMEs on npm
 ([ihateposting](https://www.npmjs.com/package/ihateposting),
 [ihateposting-mcp](https://www.npmjs.com/package/ihateposting-mcp)).
@@ -705,6 +718,7 @@ Plans and prices: [ihateposting.com/pricing](https://ihateposting.com/pricing).
 | `skills/ihateposting/references/platform-options.md` | All six: each network's option keys, loaded when needed |
 | `clawhub/ihateposting/SKILL.md` | OpenClaw and Hermes Agent, through ClawHub: the same guidance for a server added by hand |
 | `clawhub/ihateposting/references/platform-options.md` | The same file as the plugin's, for the ClawHub copy |
+| `cli/ihateposting-cli/SKILL.md` | Agents that post with the `ihateposting` command line, installed with `npx skills add iHatePostingOrg/agent-skill --skill ihateposting-cli`; in no plugin |
 | `docs/platforms.md` | What each network accepts, in full |
 | `docs/api.md` | The REST API |
 | `examples/` | Draft `create_post` payloads and how to use them |
