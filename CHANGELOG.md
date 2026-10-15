@@ -14,6 +14,13 @@ on, each version tag gets a GitHub Release with the notes below.
   guidance `ihateposting skill` writes, for an agent that posts with the
   `ihateposting` command line. It sits outside `skills/`, so no plugin ships
   it and every plugin above is unchanged; the manifests keep version 0.7.1.
+- **VS Code with GitHub Copilot, in the README.** An **Install in VS Code**
+  link and a `.vscode/mcp.json` block that add the hosted server at
+  `https://ihateposting.com/mcp/oauth`; Copilot users sign in with their
+  iHatePosting account in the browser, with no API key. This repository is
+  the `repository` of iHatePosting's entry in the official MCP Registry,
+  which GitHub reads to show the server in Copilot, so this README is what
+  Copilot users see. Documentation only; the manifests keep version 0.7.1.
 
 ## 0.7.1 — 2026-10-09
 

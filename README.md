@@ -11,6 +11,11 @@ package gives each agent the hosted iHatePosting MCP server (16 tools) and a
 skill that teaches it to post safely. Every agent here signs in with your
 iHatePosting account; none of them needs an API key.
 
+**GitHub Copilot in VS Code** uses the same hosted server:
+[Install in VS Code](https://insiders.vscode.dev/redirect/mcp/install?name=ihateposting&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Fihateposting.com%2Fmcp%2Foauth%22%7D),
+then sign in with your iHatePosting account in the browser. There is no API
+key to paste. The steps are under [Install](#install).
+
 Set-up pages for every agent:
 [Claude](https://ihateposting.com/ai-agents/claude) ·
 [Claude Code](https://ihateposting.com/ai-agents/claude-code) ·
@@ -175,6 +180,7 @@ None of them needs an API key.
 | Claude (claude.ai, desktop app, Cowork) | **Customize → Plugins** on a paid Claude plan, adding this repository as a marketplace | You sign in in the browser |
 | Claude Code | `/plugin install` from this repository's marketplace | You sign in in the browser |
 | Cursor | Cursor Marketplace once listed, a local copy, or `~/.cursor/mcp.json` | You sign in in the browser |
+| VS Code with GitHub Copilot | The **Install in VS Code** link, or `.vscode/mcp.json` | You sign in in the browser |
 | Gemini CLI | `gemini extensions install` | You sign in in the browser |
 | Grok Build | `grok plugin install ... --trust` | You sign in in the browser |
 | Kimi Code | `/plugins install` inside Kimi Code | You sign in in the browser |
@@ -268,6 +274,39 @@ cursor://anysphere.cursor-deeplink/mcp/install?name=ihateposting&config=eyJ0eXBl
 </details>
 
 <details>
+<summary><strong>VS Code with GitHub Copilot</strong></summary>
+
+Choose
+[Install in VS Code](https://insiders.vscode.dev/redirect/mcp/install?name=ihateposting&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Fihateposting.com%2Fmcp%2Foauth%22%7D)
+(or [VS Code Insiders](https://insiders.vscode.dev/redirect/mcp/install?name=ihateposting&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Fihateposting.com%2Fmcp%2Foauth%22%7D&quality=insiders)),
+or add the server to `.vscode/mcp.json` in your project:
+
+```json
+{
+  "servers": {
+    "ihateposting": {
+      "type": "http",
+      "url": "https://ihateposting.com/mcp/oauth"
+    }
+  }
+}
+```
+
+VS Code's file uses `servers` as its top-level key, not `mcpServers` like
+most other editors, so a block copied from a Cursor setup will not load. The
+file holds no secret and is safe to commit.
+
+When the server first starts, VS Code asks you to sign in. A browser window
+opens: sign in to your iHatePosting account and press **Allow**. There is no
+key to paste. Then open Copilot Chat in agent mode, where the iHatePosting
+tools appear in the tools list, and ask it to draft a post.
+
+On Copilot Business or Enterprise, your organization's admin may need to
+allow MCP servers in its Copilot policy first.
+
+</details>
+
+<details>
 <summary><strong>Gemini CLI</strong></summary>
 
 ```bash
@@ -353,7 +392,7 @@ this server does not speak.
 <details>
 <summary><strong>Other agents</strong></summary>
 
-ChatGPT, VS Code with GitHub Copilot, Codex, OpenClaw, Hermes Agent,
+ChatGPT, Codex, OpenClaw, Hermes Agent,
 DeepSeek Harness, Perplexity Computer, Zed, Cline and more connect to the same
 server without this package. Each has a set-up page (the list at the top of
 this README), and the
