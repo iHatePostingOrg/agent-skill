@@ -210,8 +210,14 @@ reports, then call `create_post`.
   ask them to upload it in iHatePosting and find it with `list_media`.
 - `get_upload_ticket` belongs to that file picker. If your agent lists it,
   never call it yourself.
-- The media library has a storage limit per plan; a full library is refused
-  with a sentence saying so.
+- The media library has a storage limit per plan. A full library is refused
+  with a sentence that names the web address of the person's library screen.
+  Give them that address: nothing here can delete a file for them, because the
+  API has no delete for media at all, so a person opening that screen is the
+  only way space is freed. `open_upload_widget` is the other way — its box
+  lists what is stored, each file with a delete button, so they can clear
+  space without leaving the chat. `list_media` carries each file's
+  `sizeBytes`, so you can say which few would free the most.
 - Alt text is set per file with `upload_media`'s `altText`. Bluesky and
   Mastodon publish it on images and videos; Instagram, Tumblr, Slack and
   Pinterest on images; Threads only on a post with a single image. LinkedIn
@@ -256,7 +262,11 @@ reports, then call `create_post`.
   - `reschedule_post` and `delete_post` act on the one post you name, which
     is one account's send. The others keep their time.
 - `reschedule_post` moves a scheduled post; a published one cannot be moved.
-  It refuses a draft. To schedule a draft, use `update_post` with
+  It refuses a draft. It also refuses a **failed** post: there is no upcoming
+  slot to move, and moving one would not send it again. Send a failed post
+  with `retry_post`, which re-queues only the sends that failed and leaves
+  anything already live alone. Read `status` from `list_posts` before you
+  call it. To schedule a draft, use `update_post` with
   `action: "schedule"`: it runs the network checks `create_post` runs and
   splits the post per account the same way. Confirm with the user first.
 - `retry_post` resends only sends that FAILED. Without `targetId` it retries
@@ -282,7 +292,7 @@ For a series (one post a day for a week, say), treat each post on its own:
 - Run `validate_post` on each one with its own `action`, date and time. A
   plan's monthly allowance and X's daily and monthly limits count the day a
   post is due, so a batch can be accepted for one day and refused for another.
-- Stay under 30 `create_post` calls a minute.
+- Stay under 120 `create_post` calls a minute.
 - Report each post's result as you go, with anything under `unresolved`.
 - If one is refused for an allowance or a limit, stop and tell the user.
   Pressing on makes more of the same refusal.
@@ -328,7 +338,7 @@ reply was a slice and nothing said so.
 ## Limits and refusals
 
 Each tool's API route allows a set number of calls per minute per user:
-`create_post` 30, `update_post` 60, `reschedule_post` 30, `retry_post` 15,
+`create_post` 120, `update_post` 60, `reschedule_post` 120, `retry_post` 15,
 `validate_post` 60, `get_post` 600, `delete_post` 600, `get_analytics` 60,
 `list_media` 120, `list_pinterest_boards` 60, and `upload_media` 30.
 `list_posts`, `list_accounts`, `get_platform_rules` and `whoami` share 60.
@@ -354,6 +364,7 @@ marked as an error (`isError`), with the reason in its text.
 | Refused on create or update | A network rule, in the network's words | Fix it or give that network an override |
 | A 400 naming an option ("did you mean ytPrivacy?") | A key or value that network does not take | Use the key or value it names; `get_platform_rules` lists them all |
 | `reschedule_post` refuses a draft | Drafts are scheduled with `update_post` | `update_post` with `action: "schedule"`, once the user says yes |
+| `reschedule_post` refuses a failed post | A failed post has no upcoming slot, and moving it would not re-send it | `retry_post`, which re-queues only the sends that failed. For a new time instead, `create_post` |
 | "The file looks incomplete" | A base64 upload was cut short | Upload by `url` instead |
 | A send stays `pending` after its time | It is held: the account needs reconnecting, or the network is limiting it | If the account is `needs_reauth`, tell the user to reconnect it; a network's limit clears by itself |
 | A send is `skipped` | It broke a rule at publish time, or the trial ended | Read its error; fix, do not retry |

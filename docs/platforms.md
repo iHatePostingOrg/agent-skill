@@ -28,7 +28,7 @@ What happens when a check fails:
 
 - A draft is saved even if a network would refuse it, as long as its option keys and values are ones the network takes. The X link rule (see X below) applies to drafts too.
 - A post created with `schedule` or `now` is refused straight away, with the first blocking reason.
-- `reschedule_post` refuses a draft. Schedule a draft with `update_post` and `action` `schedule`, which runs the create-time check.
+- `reschedule_post` refuses a draft. Schedule a draft with `update_post` and `action` `schedule`, which runs the create-time check. It refuses a failed post too — send that one again with `retry_post`.
 - To change a scheduled post and keep it going out, send `update_post` with `action` `schedule` and the post's `scheduledLocal` date and time. `action` `draft` on a scheduled post is refused, and the answer names the exact call to make. `reschedule_post` only moves the time; it cannot change the text.
 - iHatePosting checks every network again just before it sends. A send that fails that check is marked `skipped` and never reaches the network.
 

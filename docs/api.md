@@ -299,7 +299,7 @@ Pinterest needs `options.pinterest.boardId`, and a board id cannot be guessed. T
 
 These are iHatePosting's limits for storing a file. Each platform has its own limits too, which apply when a post is checked (see `video.maxSizeBytes` in `GET /api/v1/platforms`).
 
-**Storage quota.** Your whole library counts against a quota: 500 MB in total on the Free plan and on the 90-day free trial. `GET /api/v1/media` returns your `usage.usedBytes` and `usage.quotaBytes`. An upload that would go over is refused with `413`.
+**Storage quota.** Your whole library counts against a quota: 500 MB in total on the Free plan and on the 90-day free trial. `GET /api/v1/media` returns your `usage.usedBytes` and `usage.quotaBytes`. An upload that would go over is refused with `413`, and the sentence names the web address of the library screen where a file can be deleted. Give the person that address — there is no delete for media on this API, so their opening that screen is the only way space is freed.
 
 ### Three ways to upload
 
