@@ -131,7 +131,7 @@ What happens when a check fails:
 - **Accounts:** a Telegram channel, posted to by the iHatePosting bot.
 - **Post types:** a text message, a photo, a video, or an album of 2 to 10 photos and videos.
 - **Text:** 4,096 characters, or 1,024 when media is attached.
-- **Media:** up to 10 items, with at most 1 video. Photos up to 5 MB, width plus height at most 10,000 pixels, and a ratio of at most 20:1. Video: MP4, up to 50 MB alone or 20 MB inside an album.
+- **Media:** up to 10 items, with at most 1 video. Photos up to 10 MB, width plus height at most 10,000 pixels, and a ratio of at most 20:1. Video: MP4, up to 50 MB, alone or inside an album. Everything in one post together, every file counted, is at most 50 MB.
 - **Required:** nothing.
 - **Options:**
   - `linkCard`: `false` turns off the link preview.

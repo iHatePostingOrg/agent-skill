@@ -209,6 +209,11 @@ reports, then call `create_post`.
   lists what is stored, each file with a delete button, so they can clear
   space without leaving the conversation. `list_media` carries each file's
   `sizeBytes`, so you can say which few would free the most.
+- A single file bigger than the whole library is refused with a sentence of
+  its own, which names the file's size and the library's. Deleting cannot make
+  room for it, so do not send the person to free space: upload a smaller
+  version of the file instead (shorter, lower in resolution, or more
+  compressed).
 - Alt text is set per file with `upload_media`'s `altText`. Bluesky and
   Mastodon publish it on images and videos; Instagram, Tumblr, Slack and
   Pinterest on images; Threads only on a post with a single image. LinkedIn

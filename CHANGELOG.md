@@ -5,22 +5,55 @@ Every release of this package, newest first. Versions follow
 one (`scripts/check.mjs` refuses a release where they differ). From 0.5.0
 on, each version tag gets a GitHub Release with the notes below.
 
-## Unreleased
+## 0.7.3 — 2026-10-20
 
+- **A file bigger than the whole library has its own refusal.** A single file
+  larger than the person's entire media library (500 MB on the Free plan and
+  the 90-day trial) is refused with a sentence that names both sizes.
+  Deleting cannot make room for it, so the skill now says to upload a smaller
+  version instead of sending the person to free space — the opposite of what
+  a full library needs. Added to both skills and to `docs/api.md`. The hosted
+  connector gives the same advice with that refusal, and the npm package
+  `ihateposting-mcp` does from its next release, 0.12.6.
+- **Telegram's limits, measured.** iHatePosting now uploads the files to
+  Telegram itself, so the limits are Telegram's limits for uploads: photos up
+  to 10 MB (they were 5 MB), video up to 50 MB inside an album as well as
+  alone (it was 20 MB in an album), and a new limit on the whole post —
+  every file together, at most 50 MB. In `docs/platforms.md`.
+- **The first Release since 0.7.1**, so it also carries 0.7.2, which never
+  had one of its own: a full library names the screen where files can be
+  deleted, `reschedule_post` refuses a failed post, the per-minute caps are
+  120, and the command line's skill installs with `npx skills add`. The 0.7.2
+  notes in `CHANGELOG.md` have the details.
+
+## 0.7.2 — 2026-10-17
+
+Committed to `main` on 2026-10-17; no tag or GitHub Release was made for it,
+so its notes are here.
+
+- **A full library has somewhere to go.** The refusal names the web address
+  of the person's library screen, and the skill says to give them that
+  address: nothing on the API deletes media. `open_upload_widget` is the
+  other way in, with a delete button per file, and `list_media` carries each
+  file's `sizeBytes`.
+- **`reschedule_post` refuses a failed post.** A failed post has no upcoming
+  slot to move; `retry_post` sends it again, re-queueing only the sends that
+  failed.
+- **The per-minute caps are 120, not 30.**
 - **The command line's skill, installable by any agent.** `npx skills add
   iHatePostingOrg/agent-skill --skill ihateposting-cli` sets up
   `cli/ihateposting-cli/SKILL.md` for Claude Code, Cursor, Codex, GitHub
   Copilot and the other agents the open `skills` installer knows. It is the
   guidance `ihateposting skill` writes, for an agent that posts with the
   `ihateposting` command line. It sits outside `skills/`, so no plugin ships
-  it and every plugin above is unchanged; the manifests keep version 0.7.1.
+  it.
 - **VS Code with GitHub Copilot, in the README.** An **Install in VS Code**
   link and a `.vscode/mcp.json` block that add the hosted server at
   `https://ihateposting.com/mcp/oauth`; Copilot users sign in with their
   iHatePosting account in the browser, with no API key. This repository is
   the `repository` of iHatePosting's entry in the official MCP Registry,
   which GitHub reads to show the server in Copilot, so this README is what
-  Copilot users see. Documentation only; the manifests keep version 0.7.1.
+  Copilot users see.
 
 ## 0.7.1 — 2026-10-09
 
