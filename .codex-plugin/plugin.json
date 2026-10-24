@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Create, schedule and publish social media posts from ChatGPT to Instagram, Facebook, LinkedIn, X, TikTok, YouTube, Pinterest, Threads, Bluesky, Mastodon, Telegram, Discord, Slack and Tumblr. Checks each post against the network's own rules before it goes out, and reports what published, what failed and how it did.",
   "author": {
-    "name": "Hirenkumar Devani",
+    "name": "Parag Hasmukhbhai Gajera",
     "email": "support@ihateposting.com",
     "url": "https://ihateposting.com"
   },
@@ -20,7 +20,7 @@
     "displayName": "iHatePosting",
     "shortDescription": "Schedule social posts",
     "longDescription": "iHatePosting creates, schedules and publishes social media posts from ChatGPT. Connect your accounts once, then draft a post, check it against each network's rules, schedule it, reschedule it, or publish it straight away \u2014 to Instagram, Facebook, LinkedIn, X, TikTok, YouTube, Pinterest, Threads, Bluesky, Mastodon, Telegram, Discord, Slack and Tumblr.\n\nIt also uploads images and video to your media library, reports which posts published and which failed, and returns engagement figures for posts that have gone out.\n\nMade for creators, small businesses and social media managers who would rather run their publishing from the conversation than from a separate dashboard.\n\nRequires an iHatePosting account. Sign in once from ChatGPT and your connected social accounts are ready to use. Which networks are available, and which options each one accepts, depends on the accounts you have connected and on each platform's own rules and limits.",
-    "developerName": "Hirenkumar Devani",
+    "developerName": "Parag Hasmukhbhai Gajera",
     "category": "Communication",
     "capabilities": [
       "Create and draft social media posts",
