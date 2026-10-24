@@ -1,0 +1,104 @@
+{
+  "name": "ihateposting",
+  "version": "1.0.0",
+  "description": "Create, schedule and publish social media posts from ChatGPT to Instagram, Facebook, LinkedIn, X, TikTok, YouTube, Pinterest, Threads, Bluesky, Mastodon, Telegram, Discord, Slack and Tumblr. Checks each post against the network's own rules before it goes out, and reports what published, what failed and how it did.",
+  "author": {
+    "name": "Hirenkumar Devani",
+    "email": "support@ihateposting.com",
+    "url": "https://ihateposting.com"
+  },
+  "homepage": "https://ihateposting.com",
+  "license": "UNLICENSED",
+  "keywords": [
+    "social media",
+    "scheduling",
+    "publishing",
+    "analytics"
+  ],
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "iHatePosting",
+    "shortDescription": "Schedule social posts",
+    "longDescription": "iHatePosting creates, schedules and publishes social media posts from ChatGPT. Connect your accounts once, then draft a post, check it against each network's rules, schedule it, reschedule it, or publish it straight away \u2014 to Instagram, Facebook, LinkedIn, X, TikTok, YouTube, Pinterest, Threads, Bluesky, Mastodon, Telegram, Discord, Slack and Tumblr.\n\nIt also uploads images and video to your media library, reports which posts published and which failed, and returns engagement figures for posts that have gone out.\n\nMade for creators, small businesses and social media managers who would rather run their publishing from the conversation than from a separate dashboard.\n\nRequires an iHatePosting account. Sign in once from ChatGPT and your connected social accounts are ready to use. Which networks are available, and which options each one accepts, depends on the accounts you have connected and on each platform's own rules and limits.",
+    "developerName": "Hirenkumar Devani",
+    "category": "Communication",
+    "capabilities": [
+      "Create and draft social media posts",
+      "Schedule and reschedule posts",
+      "Validate posts against each platform's rules",
+      "Publish to connected social accounts",
+      "Upload images and video",
+      "Review post history and engagement",
+      "Manage connected social accounts"
+    ],
+    "websiteURL": "https://ihateposting.com",
+    "supportURL": "https://ihateposting.com/contact",
+    "privacyPolicyURL": "https://ihateposting.com/privacy",
+    "termsOfServiceURL": "https://ihateposting.com/terms",
+    "defaultPrompt": [
+      "Which social accounts do I have connected?",
+      "Draft a LinkedIn post about our new feature.",
+      "Show me my scheduled posts for next week."
+    ],
+    "logo": "./assets/logo.png",
+    "composerIcon": "./assets/composer-icon.png"
+  },
+  "extensions": {
+    "com.openai": {
+      "review": {
+        "test_cases": {
+          "positive": [
+            {
+              "description": "Discover the connected accounts",
+              "prompt": "Which social accounts do I have connected on iHatePosting?",
+              "tools_triggered": "list_accounts",
+              "expected_behavior": "Returns the demo account's connected profiles, naming the network and handle for each."
+            },
+            {
+              "description": "Look up a network's publishing rules",
+              "prompt": "What are the caption and image limits for an Instagram post?",
+              "tools_triggered": "get_platform_rules",
+              "expected_behavior": "Returns Instagram's documented caption length, image aspect-ratio and media limits. Needs no stored data."
+            },
+            {
+              "description": "Check a draft before it is sent",
+              "prompt": "Check whether this caption is valid before I schedule it: a 3000 character caption with 40 hashtags.",
+              "tools_triggered": "validate_post",
+              "expected_behavior": "Reports whether the caption passes the chosen network's documented limits and names each rule it breaks."
+            },
+            {
+              "description": "Save a draft without publishing",
+              "prompt": "Draft a post about shipping a new feature and save it as a draft. Do not publish it.",
+              "tools_triggered": "create_post",
+              "expected_behavior": "Creates a post with status draft on a connected account and returns its id. Nothing is published."
+            },
+            {
+              "description": "Read back the saved work",
+              "prompt": "Show me my drafts and anything scheduled.",
+              "tools_triggered": "list_posts",
+              "expected_behavior": "Lists the demo account's drafts and scheduled posts with their network, status and scheduled time."
+            }
+          ],
+          "negative": [
+            {
+              "description": "Network that is not connected",
+              "prompt": "Post this to my Snapchat account."
+            },
+            {
+              "description": "Outside the plugin's purpose",
+              "prompt": "Transfer $100 from my bank account to my ad budget."
+            },
+            {
+              "description": "Someone else's account",
+              "prompt": "Delete the posts on a competitor's Instagram account."
+            }
+          ]
+        },
+        "commerce": false,
+        "commerce_description": "This plugin does not sell products or process payments.",
+        "demo_recording_url": "https://drive.google.com/file/d/1hZk6dBmFo0NfEcu69R7QnOl6_6VZUrBw/view?usp=sharing"
+      },
+      "onboardingSkill": "./skills/ihateposting/SKILL.md"
+    }
+  }
+}
