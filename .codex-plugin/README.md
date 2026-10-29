@@ -8,21 +8,35 @@ exporting version 1.0.0 from the portal.
 
 ## Building the ZIP
 
-The archive OpenAI accepts has this shape, flat at the root:
+**This directory is the archive**, one file for one file. Only the last row is
+a rename:
 
-```
-.codex-plugin/plugin.json
-.mcp.json
-assets/composer-icon.png
-assets/logo.png
-skills/ihateposting/SKILL.md      <- the variant in THIS directory, not the repo's
-```
+| in this repository | in the ZIP |
+| --- | --- |
+| `.codex-plugin/plugin.json` | `plugin.json` |
+| `.codex-plugin/.mcp.json` | `.mcp.json` |
+| `.codex-plugin/assets/logo.png` | `assets/logo.png` |
+| `.codex-plugin/assets/composer-icon.png` | `assets/composer-icon.png` |
+| `.codex-plugin/SKILL.md` | `skills/ihateposting/SKILL.md` |
+
+Everything the manifest names is written `./…` and is **relative to the
+archive root**, which is why those files sit here and not at the repository
+root: `"./assets/logo.png"` resolves inside this directory and nowhere else.
+
+They also cannot live at the root. `scripts/check.mjs` refuses a root
+`.mcp.json` — a directory's installer picks one up and adds a server this
+package never declared — and refuses binaries anywhere outside the two image
+paths in the table, which are named there one by one. Moving any of these back
+up breaks the check, and moving them anywhere else breaks the manifest.
 
 `SKILL.md` here is deliberately a **stripped** copy: the shared
 `skills/ihateposting/SKILL.md` carries frontmatter for the other five vendors
 (`license`, `compatibility`, `metadata`, `allowed-tools`) that the Codex
 package does not ship. Copy this one into `skills/ihateposting/` when
 assembling, and do not overwrite the shared file with it.
+
+The version here is **OpenAI's app version**, which the portal locks to the
+app. It is not the skill's version and is not expected to match it.
 
 ## What the portal will reject you for
 

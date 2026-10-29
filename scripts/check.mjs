@@ -231,12 +231,50 @@ for (const f of [".mcp.json", "mcp.json", "plugin.json"]) {
   if (existsSync(join(ROOT, f))) fail(`${f} must not exist at the root (see README, "What is in this repository")`);
 }
 
+/* THE ONLY TWO BINARIES IN THE REPOSITORY, and they are an exception that has
+   to stay exactly this narrow. Every directory that scans this package reads
+   text: a PNG is a file their scanner cannot read as code, so each reference
+   to one was held for review (see the SVG note above). OpenAI's portal is the
+   one vendor that requires images — a ZIP with no `logo` and no
+   `composerIcon` is rejected — and those two images are listed here by name
+   so the carve-out cannot quietly become a folder anyone drops art into.
+   They live under .codex-plugin/ rather than at the root because that
+   directory IS the ZIP: the manifest's "./assets/logo.png" is relative to the
+   archive root, so it resolves there and nowhere else. */
+const CODEX_IMAGES = [".codex-plugin/assets/logo.png", ".codex-plugin/assets/composer-icon.png"];
+
 /* Files the directory refuses outright (macOS and Windows litter), and any
    binary — the plugin ships text only, so nothing needs a reviewer's eye. */
 for (const p of walk(ROOT)) {
   const rel = relative(ROOT, p).replaceAll("\\", "/");
   if (/(^|\/)(\.DS_Store|Thumbs\.db|desktop\.ini)$|(^|\/)__MACOSX\//i.test(rel)) fail(`${rel}: an operating-system file; delete it`);
-  if (/\.(png|jpe?g|gif|webp|ico|pdf|zip|mcpb|dxt)$/i.test(rel)) fail(`${rel}: a binary file — the plugin ships text only`);
+  if (CODEX_IMAGES.includes(rel)) continue;
+  if (/\.(png|jpe?g|gif|webp|ico|pdf|zip|mcpb|dxt)$/i.test(rel)) {
+    fail(`${rel}: a binary file — the plugin ships text only (only ${CODEX_IMAGES.join(" and ")} are allowed, for OpenAI's portal)`);
+  }
+}
+
+/* The exception earns its keep only while the manifest actually points at
+   those two files, and the ZIP is only rebuildable while they exist. Both
+   paths below are the manifest's own, read as the archive reads them: from
+   .codex-plugin/, which is the ZIP root. */
+for (const rel of [...CODEX_IMAGES, ".codex-plugin/.mcp.json", ".codex-plugin/SKILL.md", ".codex-plugin/plugin.json"]) {
+  if (!existsSync(join(ROOT, rel))) fail(`${rel}: missing — the ChatGPT ZIP cannot be rebuilt without it`);
+}
+/* NOT added to `versions` above, deliberately: the ChatGPT package carries
+   OpenAI's own app version (1.0.0), which the portal locks to the app and
+   which has nothing to do with the skill's. Adding it there would make every
+   release fail on "manifests disagree on the version". */
+if (existsSync(join(ROOT, ".codex-plugin/plugin.json"))) {
+  const codex = readJson(".codex-plugin/plugin.json");
+  for (const [key, want] of [["logo", "./assets/logo.png"], ["composerIcon", "./assets/composer-icon.png"]]) {
+    const got = codex?.interface?.[key];
+    if (got !== want) fail(`.codex-plugin/plugin.json: interface.${key} is ${JSON.stringify(got)}, expected ${JSON.stringify(want)} — OpenAI's portal rejects a package without it`);
+  }
+  if (codex?.mcpServers !== "./.mcp.json") fail(`.codex-plugin/plugin.json: mcpServers must be "./.mcp.json", the path inside the archive`);
+}
+if (existsSync(join(ROOT, ".codex-plugin/.mcp.json")) && readJson(".codex-plugin/.mcp.json")?.mcpServers?.ihateposting?.type !== "streamable-http") {
+  fail('.codex-plugin/.mcp.json: type must be "streamable-http" — "http" is one of the things the portal rejects');
 }
 
 // 4. The skill.

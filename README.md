@@ -747,6 +747,7 @@ Plans and prices: [ihateposting.com/pricing](https://ihateposting.com/pricing).
 | Path | For |
 |------|-----|
 | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `mcp.claude.json` | Claude (claude.ai, Cowork, Claude Code) |
+| `.codex-plugin/` | ChatGPT, through OpenAI's plugin portal. The whole directory is the ZIP that gets submitted — the manifest, its own `.mcp.json`, the two images the portal requires, and a stripped copy of the skill. See [its README](.codex-plugin/README.md) |
 | `.cursor-plugin/plugin.json`, `mcp.cursor.json` | Cursor |
 | `gemini-extension.json` | Gemini CLI |
 | `.grok-plugin/plugin.json`, `.grok-plugin/marketplace.json`, `mcp.grok.json` | Grok Build |
