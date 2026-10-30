@@ -1,12 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" role="img" aria-label="iHatePosting">
-  <defs>
-    <linearGradient id="tile" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#6D4AFF"/><stop offset="1" stop-color="#FF5CA8"/>
-    </linearGradient>
-  </defs>
-  <rect width="120" height="120" rx="26" fill="url(#tile)"/>
-  <g transform="translate(60,60) scale(3.1) translate(-12,-12)">
-    <path d="M12 21.35 10.55 20.03C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35Z" fill="#ffffff"/>
-    <path d="M12 5.1 10.4 9l3.2 3-2.8 3.5L12 20.6" fill="none" stroke="url(#tile)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- The iHatePosting mark: three tiles, one post going out to several places
+       at once. Rounded plate because marketplace listings show this icon as it
+       is drawn; the square, full-bleed version lives in the PNGs beside it,
+       where launchers apply their own mask. -->
+  <rect width="120" height="120" rx="26" fill="#ffffff"/>
+  <!-- Centred on the artwork's own content box rather than the viewBox: the
+       stack leans up and to the right, so centring on the box would sit it low
+       and left. -->
+  <g transform="translate(60,60) scale(1.1189) translate(-67.21,-61.70)">
+    <g transform="translate(4 6)">
+      <rect x="21" y="27" width="70" height="70" rx="16" fill="#8fa2ff" stroke="#ffffff" stroke-width="3.5" transform="rotate(-16 56 62)"/>
+      <rect x="28" y="21" width="70" height="70" rx="16" fill="#3355ff" stroke="#ffffff" stroke-width="3.5" transform="rotate(-10 63 56)"/>
+      <rect x="35" y="15" width="70" height="70" rx="16" fill="#ffffff" stroke="#0f1222" stroke-width="4" transform="rotate(-4 70 50)"/>
+      <path fill="#0f1222" transform="rotate(-4 70 50) translate(60.73 74.45) scale(0.06 -0.06)" d="M40 713Q40 757 71.5 786.0Q103 815 155 815Q206 815 237.5 786.0Q269 757 269 713Q269 670 237.5 641.5Q206 613 155 613Q103 613 71.5 641.5Q40 670 40 713ZM252 561V0H56V561Z"/>
+    </g>
   </g>
 </svg>
