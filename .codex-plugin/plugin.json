@@ -1,6 +1,6 @@
 {
   "name": "ihateposting",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Create, schedule and publish social media posts from ChatGPT to Instagram, Facebook, LinkedIn, X, TikTok, YouTube, Pinterest, Threads, Bluesky, Mastodon, Telegram, Discord, Slack and Tumblr. Checks each post against the network's own rules before it goes out, and reports what published, what failed and how it did.",
   "author": {
     "name": "Parag Hasmukhbhai Gajera",
