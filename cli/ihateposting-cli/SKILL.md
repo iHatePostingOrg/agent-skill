@@ -25,9 +25,6 @@ npm install -g ihateposting
 ihateposting login <key>        # from Settings -> Developers
 ```
 
-In CI there is nothing to log into — set `IHATEPOSTING_API_KEY` and every
-command below works unchanged.
-
 ## Find out what is possible before composing
 
 ```bash
