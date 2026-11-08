@@ -7,7 +7,6 @@ metadata:
   last-updated: "2026-10-03"
   homepage: "https://ihateposting.com/guides/post-to-social-media-from-an-ai-agent"
   openclaw: {"emoji": "💔", "homepage": "https://ihateposting.com/ai-agents/openclaw", "requires": {"bins": [], "env": []}}
-allowed-tools: mcp__plugin_ihateposting_ihateposting__whoami mcp__plugin_ihateposting_ihateposting__list_accounts mcp__plugin_ihateposting_ihateposting__get_platform_rules mcp__plugin_ihateposting_ihateposting__validate_post mcp__plugin_ihateposting_ihateposting__list_posts mcp__plugin_ihateposting_ihateposting__get_post mcp__plugin_ihateposting_ihateposting__list_media mcp__plugin_ihateposting_ihateposting__list_pinterest_boards
 ---
 
 # Posting with iHatePosting

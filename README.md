@@ -539,20 +539,9 @@ measure at all, so a missing number is not mistaken for no reach.
 16 tools run from [`ihateposting-mcp`](https://www.npmjs.com/package/ihateposting-mcp),
 which needs Node.js 20 or later (since 0.10.0):
 
-```json
-{
-  "mcpServers": {
-    "ihateposting": {
-      "command": "npx",
-      "args": ["-y", "ihateposting-mcp"],
-      "env": { "IHATEPOSTING_API_KEY": "pk_live_…" }
-    }
-  }
-}
-```
-
-`IHATEPOSTING_API_URL` changes the server it talks to (default
-`https://ihateposting.com`).
+It signs in with an API key that you create yourself under Settings → Developers
+at ihateposting.com. The exact configuration for each client is on the
+[AI agents pages](https://ihateposting.com/ai-agents).
 
 **Command line.** [`ihateposting`](https://www.npmjs.com/package/ihateposting)
 (`npm i -g ihateposting`, or `npx ihateposting <command>` without installing)
@@ -562,7 +551,7 @@ posts. Its commands are `login`, `logout`, `whoami`, `accounts`, `platforms`,
 and the main flags.
 
 ```bash
-ihateposting login <key>                                   # saved in ~/.ihateposting/config.json
+ihateposting login <key>                                   # the key you created under Settings → Developers
 ihateposting whoami                                        # which account the key belongs to
 ihateposting accounts --json                               # connected accounts, with ids
 ihateposting upload ./launch.mp4 --alt "Product demo"      # prints a media id
