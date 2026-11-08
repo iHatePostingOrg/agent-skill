@@ -23,9 +23,6 @@ jobs:
         with:
           node-version: 22
 
-      # The same gate as every push: manifests, sign-in configs, skill, examples.
-      - run: node scripts/check.mjs
-
       - name: The tag must match the manifests, and the notes must be dated
         run: |
           version="${GITHUB_REF_NAME#v}"

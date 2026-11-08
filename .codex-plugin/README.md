@@ -23,7 +23,7 @@ Everything the manifest names is written `./…` and is **relative to the
 archive root**, which is why those files sit here and not at the repository
 root: `"./assets/logo.png"` resolves inside this directory and nowhere else.
 
-They also cannot live at the root. `scripts/check.mjs` refuses a root
+They also cannot live at the root. The release check (kept outside this repository) refuses a root
 `.mcp.json` — a directory's installer picks one up and adds a server this
 package never declared — and refuses binaries anywhere outside the two image
 paths in the table, which are named there one by one. Moving any of these back

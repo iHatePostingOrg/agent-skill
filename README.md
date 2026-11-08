@@ -751,7 +751,6 @@ Plans and prices: [ihateposting.com/pricing](https://ihateposting.com/pricing).
 | `docs/platforms.md` | What each network accepts, in full |
 | `docs/api.md` | The REST API |
 | `examples/` | Draft `create_post` payloads and how to use them |
-| `scripts/check.mjs`, `.github/workflows/check.yml` | The release check, run on every push |
 | `.github/workflows/release.yml` | Publishes a GitHub Release, with its changelog notes, for every version tag |
 | `CHANGELOG.md` | What changed in each release |
 
@@ -760,9 +759,11 @@ server; all of them point at the same sign-in address. There is deliberately
 no `.mcp.json` at the root, so no tool picks up a server this package did not
 mean to give it.
 
-`node scripts/check.mjs` checks the manifests, the key handling, the skill and
-the examples before a release. It also checks that this README names every
-tool and network, and that every example is a draft.
+The manifests, the key handling, the skill and the examples are checked before
+each release, along with the README naming every tool and network and every
+example being a draft. The check runs in our own repository, not here: the
+directory scans every file of a plugin and refuses a version that ships a
+script.
 
 ## Feedback and issues
 
