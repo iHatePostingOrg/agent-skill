@@ -5,6 +5,17 @@ Every release of this package, newest first. Versions follow
 one (`scripts/check.mjs` refuses a release where they differ). From 0.5.0
 on, each version tag gets a GitHub Release with the notes below.
 
+## Unreleased
+
+- **A full library can be topped up by asking for more.** The "Request more
+  storage" button on the person's Media screen (and in New post's media
+  picker) asks for a bigger library of 1, 2, 5 or 10 GB, and an admin approves
+  it. A refusal for a full library now says so, `GET /api/v1/media` returns the
+  person's latest request as `usage.request`, and both skills and
+  `docs/api.md` tell an agent to offer the button. Nothing on the API or the
+  MCP server can send the request. The hosted connector gives this advice as
+  soon as it is deployed; the npm package `ihateposting-mcp` does from 0.12.9.
+
 ## 0.7.3 — 2026-10-20
 
 - **A file bigger than the whole library has its own refusal.** A single file

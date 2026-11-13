@@ -217,12 +217,17 @@ reports, then call `create_post`.
   only way space is freed. `open_upload_widget` is the other way — its box
   lists what is stored, each file with a delete button, so they can clear
   space without leaving the chat. `list_media` carries each file's
-  `sizeBytes`, so you can say which few would free the most.
+  `sizeBytes`, so you can say which few would free the most. The same screen
+  has a "Request more storage" button for when deleting is not what they want:
+  they ask for a bigger library (1, 2, 5 or 10 GB), an admin approves it, and
+  they are emailed when it is done. The refusal names it too. Nothing here can
+  send that request, so offer it and leave the pressing to them.
 - A single file bigger than the whole library is refused with a sentence of
   its own, which names the file's size and the library's. Deleting cannot make
   room for it, so do not send the person to free space: upload a smaller
   version of the file instead (shorter, lower in resolution, or more
-  compressed).
+  compressed). If they must have that exact file, a bigger library is the only
+  way it fits, and the same "Request more storage" button asks for one.
 - Alt text is set per file with `upload_media`'s `altText`. Bluesky and
   Mastodon publish it on images and videos; Instagram, Tumblr, Slack and
   Pinterest on images; Threads only on a post with a single image. LinkedIn
